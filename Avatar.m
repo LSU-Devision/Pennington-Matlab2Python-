@@ -69,8 +69,6 @@ classdef Avatar
         r_foot = NaN(1,3) % right foot min
         l_foot = NaN(1,3) % left foot min
         crotch = NaN(1,3) % crotch
-%         r_waist = NaN(1,3) %right waist
-%         l_waist = NaN(1,3) %left waist   
         l_ankle = NaN(1,3)
         r_ankle = NaN(1,3)
         lShoulder = NaN(1,3)
@@ -243,14 +241,6 @@ classdef Avatar
                         end
                     elseif strcmp(varargin{i},'steps')
                         self.steps=varargin{i+1};
-                       
-%                         if sum(ismember(varargin{i+1},1),2) %CleaningMesh
-%                             self.steps=1;
-%                         elseif sum(ismember(varargin{i+1},2),2) % MeshRepair
-%                             self.steps=2;
-%                         elseif sum(ismember(varargin{i+1},3),2) %LandmarkDetection_DAs
-%                            self.steps=3;
-%                         end
                      elseif strcmp(varargin{i},'Vol_SA')
                          if (strcmp(varargin{i+1},'on') || (varargin{i+1}==1))
                             self.Vol_SA=1;
@@ -287,11 +277,6 @@ classdef Avatar
                     end
                 end
             end 
-                
-%                 if max(max(self.v))>1000
-%                     self.v = self.v*10^(-3)/2;
-%                 end 
-             
 
 
             if ismember(1,self.steps) %CleaningMesh
@@ -303,12 +288,8 @@ classdef Avatar
             [~,self.f,self.v] = meshRepair(self.f,self.v);
             %[self.f,self.v] = deleteFaceIntersections(self.f,self.v);
             end
-            
-             %self.v = fixOrientation(self);
-
-            
              
-            %%
+            
             if (self.circ_cpd  || self.template_only) %|| self.Vol_SA
                 % initialize the configuration for the CPD template matching algorithm
                 [self.circ_template_s,self.circ_template_l,self.circ_template_xl] = init_circ();
@@ -344,9 +325,7 @@ classdef Avatar
                 [self.collar] = getCollar(self);
 
                 % wrists
-%                 [self.r_wrist, self.l_wrist, self.r_wristgirth, self.l_wristgirth,self.rwrist_ulnar,self.rwrist_radial,self.lwrist_ulnar,self.lwrist_radial] = getWrist(self);
-                [self.r_wrist, self.l_wrist,...
-                 self.r_wristgirth, self.l_wristgirth,...
+                [self.r_wrist, self.l_wrist, self.r_wristgirth, self.l_wristgirth,...
                  self.rwrist_front,self.rwrist_back,self.rwrist_lateral,self.rwrist_medial,...
                  self.lwrist_front,self.lwrist_back,self.lwrist_lateral,self.lwrist_medial] = getWrist(self);
 
@@ -365,8 +344,6 @@ classdef Avatar
 
                 % waist
                 [self.waistCircumference, ~] = getWaist(self);
-    %             self.k10 = waistPoints(1,:);
-    %             self.k11 = waistPoints(2,:);
 
                 % arm lengths
                 [self.leftArmLength, self.rightArmLength, self.armMaxR, self.armMaxL] = getArmLength(self);
@@ -394,9 +371,6 @@ classdef Avatar
                 % crotch height
                 [self.crotchHeight] = getCrotchHeight(self);
 
-
-    %             self.trunkIdx = getTrunk(self);
-
                 % arm girths
                 [self.r_forearmgirth,self.l_forearmgirth,...
                  self.r_bicepgirth, self.l_bicepgirth,...
@@ -411,7 +385,6 @@ classdef Avatar
                 self.nose_tip = getNoseTip(self);
                 [self.rtoe_tip, self.rheel_tip, self.ltoe_tip, self.lheel_tip] = getFeetTips(self);
 
-                
                 % front, back, left, and right curve
                 [self.rcurve, self.lcurve, ~] = getCurve(self,1,12);
                 [self.fcurve, self.bcurve, ~] = getCurve(self,2,12);
@@ -430,15 +403,6 @@ classdef Avatar
             end
             
             if  self.template_only %|| self.Vol_SA 
-                
-%                 % fit template to legs
-%                 [self.r_leg_template_v,self.r_leg_template_f, self.l_leg_template_v,self.l_leg_template_f] = templateFitting_leg(self);            
-% 
-%                 % fit template to trunk
-%                 [self.trunk_template_v,self.trunk_template_f] = templateFitting_trunk(self);
-% 
-%                 % fit template to arms
-%                 [self.r_arm_template_v,self.r_arm_template_f, self.l_arm_template_v,self.l_arm_template_f] = templateFitting_arm(self);
 
                 % fit template to head and neck
                 [self.head_neck_template_v,self.head_neck_template_f, self.head_neck_bottomSliceReducted_v, self.head_neck_bottomSliceReducted_f] = templateFitting_headNeck(self);
@@ -487,8 +451,6 @@ classdef Avatar
                 self = OriginalRoatationLandmarks (CaseRot,alpha2,alpha3,self);
                 self.createMarkers_template(input);
             end 
-            % Knees
-           % [self.left_Knee, self.right_Knee] = getKnee(self);
          end
   
         %% Methods
@@ -588,7 +550,6 @@ classdef Avatar
             V = self.v;
             F = self.f;
             
-            %figure; plot3(self.v(pCases,1),self.v(pCases,2),self.v(pCases,3),'-*'); hold on;
             for p = pCases'
                 index = F(:,1) == p | F(:,2) == p | F(:,3) == p;
                 F(index,:) = [];
@@ -605,11 +566,9 @@ classdef Avatar
         end
         
         function [v,f] = deleteProblems(self,bdyEdges)
-            %bdyEdges = getBoundaryEdges(self);
             subs = [bdyEdges(:,1);bdyEdges(:,2)];
             A = accumarray(subs,1);
             vertices = find(A ~= 2 & A~=0);
-            %vertices = unique([bdyEdges(:,1);bdyEdges(:,2)]);
             [v,f] = peelSkin(self,vertices);
         end
         
@@ -617,7 +576,7 @@ classdef Avatar
              v1 = self.v(:,1);
             rLegIdx = self.legIdx(v1(self.legIdx) < self.crotch(1,1));
             lLegIdx = self.legIdx(v1(self.legIdx) >= self.crotch(1,1));
-%             %option 1
+%         %option 1
 %             dist = self.k3(3) - self.r_ankle(3);
 %             zValue = 0.5*dist + self.r_ankle(3);
           %option 2
@@ -650,8 +609,6 @@ classdef Avatar
             if(self.circ_elipse)
                 [rightknee.templatePoints,rightknee.templateValue] = template_circumference(vOnLine);
             end
-%             dist = self.k6(3) - self.l_ankle(3);
-%             zValue = 0.5*dist + self.l_ankle(3);
             vOnLine = getVOnLine(self, self.v, zValueL, lLegIdx);
             [leftknee.value,b] = getCircumference(vOnLine(:,1), vOnLine(:,2));
             leftknee.points = vOnLine(b,:); 
@@ -709,16 +666,13 @@ classdef Avatar
         function [k9_adj] = adjustCrotch(self)
             k9_adj = self.crotch;
              N = 20;
-%             zPoints = linspace(self.k9(3), (min(self.k2(3),self.k4(3))+self.k9(3))/2, N);
             zPoints = linspace(self.crotch(3), min(self.r_armpit(3),self.l_armpit(3)), N);
             mx_v_bot = zeros(2,N); % max points in y direction
             delta_v2 = zeros(1,N);
-%             delta_v1 = zeros(1,N);
             cnd_vector = ones(1,N);
             armIdx = [self.lArmIdx; self.rArmIdx];
             noArmIdx = (1:length(self.v));
             noArmIdx(armIdx) = [];   
-%             figure;
             for i = 1:N
                 vOnLine = getVOnLine(self, self.v, zPoints(i), noArmIdx);
                 v1 = vOnLine(:,1);
@@ -749,9 +703,6 @@ classdef Avatar
                 [mx_v_bot(2,i), Idx_v2_bot] = max(v2_bot);
                 mx_v_bot(1,i) = v1_bot(Idx_v2_bot);
                 Idx_mx_cvh = (v1h_bot == mx_v_bot(1,i));
-%                 subplot(4,5,i); plot(v1_bot,v2_bot,'.'); hold on; %
-% %                 plot(mx_v1_bot(i),mx_v2_bot(i),'*'); hold on; %
-%                 plot(v1h_bot,v2h_bot,'.'); hold on; %
                
                 if (i~=1)                
                     if (sum(Idx_mx_cvh)>0) % Check if max is part of convexhull
@@ -771,7 +722,6 @@ classdef Avatar
                         v1h_botL = v1h_bot(l_Idx); 
                         v1h_botL = v1h_botL(IdxL);  
                         
-%                         delta_v1(i) = v1h_botR - v1h_botL;
                         if (isempty(v2h_botR))
                             mid_v2h = v2h_botL;
                         elseif (isempty(v2h_botL))
@@ -786,13 +736,9 @@ classdef Avatar
                         else
                             mid_v1h = (v1h_botR + v1h_botL)./ 2;
                         end                        
-%                         mid_v2h = (v2h_botR + v2h_botL)./ 2; % average of left and right in y-direction
-%                         mid_v1h = (v1h_botR + v1h_botL)./ 2; % average of left and right in x-direction
-%                         try
+
                         [~,IdxMid_v1_bot] = min(abs(v1_bot-mid_v1h));
-%                         catch
-%                             sima = 0;
-%                         end
+
                         mid_v2_bot = v2_bot(IdxMid_v1_bot);
                         dlt_cnd = 1;
                         org_IdxMid_v1_bot = IdxMid_v1_bot;
@@ -819,26 +765,14 @@ classdef Avatar
                         end
                         if (~isempty(v2_bot))
                             [mid_max_v2_bot,Idx_md_mx] = max(v2_bot);
-    %                         Idx_md = find(v2_bot==mid_v2_bot);
                             Idx_md = IdxMid_v1_bot;
                             x_mid_max_v2_bot=v1_bot(org_v2_bot == mid_max_v2_bot);
-    %                         cnd1 = (Idx_md_mx-Idx_md)>(length(v2_bot)-Idx_md_mx);
-    %                         cnd2 = (Idx_md_mx-Idx_md)>(Idx_md_mx-1);
-    %                         if (cnd1 || cnd2)
                             x_v1_bot = v1_bot(org_IdxMid_v1_bot);
                             if(abs(x_mid_max_v2_bot)>abs(x_v1_bot))
                                 delta_v2(i) = mid_v2_bot - mid_v2h;      
-    %                             plot(x_v1_bot,mid_v2_bot,'*'); 
-    %                             plot(x_mid_max_v2_bot,mid_max_v2_bot,'*');
                             else
                                 delta_v2(i) = mid_max_v2_bot - mid_v2h; 
-    %                             plot(x_mid_max_v2_bot,mid_max_v2_bot,'*');
                             end
-%     %                         plot(v1_bot(IdxMid_v1_bot),mid_v2_bot,'*'); 
-%     %                         plot(x_mid_max_v2_bot_,mid_max_v2_bot,'*');
-%     %                         plot(mid_v1h,mid_v2h,'*');
-%                             plot(v1h_botL,v2h_botL,'*'); 
-%                             plot(v1h_botR,v2h_botR,'*'); hold off; 
                         else
                             delta_v2(i) = 0;
                         end
@@ -846,51 +780,18 @@ classdef Avatar
                 end
             end
             
-%             [t1,~] = kmeans(delta_v1',2);
             [s1,~] = kmeans(delta_v2',2);  
-%             [st3,~] = kmeans([delta_v1' delta_v2'],3);
-%             [st,~] = kmeans([delta_v1' delta_v2'],2);
             
             i = 1;
             cnd = cnd_vector(i);
             while (i<N && cnd)
                 i = i + 1;
-%                 cnd = cnd_vector(i) * (t1(i)~=t1(1)) * (s1(i)~=s1(1));
-%                 cnd = cnd_vector(i) * (st(i)~=st(1));
                 cnd = cnd_vector(i) * (s1(i)~=s1(1));
-            end
-%             i3=1;
-%             while (i3<N && cnd)
-%                 i3 = i3 + 1;
-%                 cnd = cnd_vector(i) * (st3(i)==st3(2));
-%             end      
-%             i3 = i3-1
-%             k9_adj3(3) = zPoints(i3)
-            
-%             we want i-2 because of transition stages 
-%             if (i>2)
-%                 i = i-2;
-%             else
-%                 i = i-1;
-%             end
-%             % (for males it's larger because of genitals)
-%             if (self.m==0)
-%                 i = i-1;
-%             elseif (self.m==1)
-%                 if (i>4)
-%                     i = i-4;
-%                 else % i==2
-%                     i = i-1;
-%                 end
-%             end
+            end 
+
             i = i-1;
             k9_adj(3) = zPoints(i);
-%             if (i>1)
-%                 zPoints(i-1)
-%             end
-%             k9_adj = [mx_v1_bot(i),mx_v2_bot(i),zPoints(i)];
-% i
-% k9_adj(3)
+
         end
         
         function [k2, k4] = getArmpits(self)
