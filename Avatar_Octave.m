@@ -37,6 +37,8 @@ classdef Avatar
         % the front and the back of the Avatar with the 30 markers
         % Use 'armpits_alt' > 'on' to use alternative armpit method, default is 'off'
         
+
+
         % Note: 
             % More than one property can be set at the same time
             % Ordering which properties are mentionned does not matter
@@ -211,6 +213,10 @@ classdef Avatar
                 end
             end
             
+
+
+
+
             
             [CaseRot,alpha2,alpha3,self.v] = fixOrientation(self);
             
@@ -298,7 +304,7 @@ classdef Avatar
             %[self.f,self.v] = deleteFaceIntersections(self.f,self.v);
             end
             
-%             self.v = fixOrientation(self);
+             %self.v = fixOrientation(self);
 
             
              
