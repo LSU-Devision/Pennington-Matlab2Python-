@@ -1255,8 +1255,6 @@ classdef Avatar
         function [lLegLength, rLegLength] = getLegLength(self)
             % 'New Code'
             V = self.v;
-%             rlegMaxZ = (self.k9(3)+self.k3(3))/2;
-%             llegMaxZ = (self.k9(3)+self.k6(3))/2;
             rlegMaxZ = self.r_hip(3);
             llegMaxZ = self.l_hip(3);
             rnewV=V(V(:,1)>0,:);
@@ -1265,23 +1263,12 @@ classdef Avatar
             [llegMinZ, llegMinId] = min(lnewV(:,3));
             rlegMinX=rnewV(rlegMinId,1);
             llegMinX=lnewV(llegMinId,1);
-%             rlegMinZ = self.r_ankle(:,3);
-%             llegMinZ = self.l_ankle(:,3);
-%             rlegMinX=self.r_ankle(:,1);
-%             llegMinX=self.l_ankle(:,1);
-
             cMinX=(rlegMinX-llegMinX)/2;
             deltaX=rlegMinX-cMinX;
             ldeltaZ=llegMaxZ - llegMinZ;
             rdeltaZ=rlegMaxZ - rlegMinZ;
             lLegLength = sqrt(deltaX^2+ldeltaZ^2);
             rLegLength = sqrt(deltaX^2+rdeltaZ^2);
-            
-           % Old Code
-%             legMaxZ = (self.k9(3)+self.k3(3))/2;
-%             legMinZ = min(self.v(:,3));
-%             rLegLength = legMaxZ - legMinZ;
-%             lLegLength = rLegLength;
         end
         
         function [crotchHeight] = getCrotchHeight(self)
@@ -1315,10 +1302,6 @@ classdef Avatar
             % Finds end_points
             [x_min, x_min_idx] = min(x); %mins give right side point, maxes give left side point
             [x_max, x_max_idx] = max(x);
-            
-%                 [y_backPoint,indx_backPoint] = max(y);
-%                 x_backPoint = x(indx_backPoint);
-%                 z_backPoint = z(indx_backPoint);
             back_y = y(y>0);
             back_x = x(y>0);
             back_z = z(y>0);
@@ -1378,11 +1361,7 @@ classdef Avatar
             v_aboveShoulder = self.v(self.v(:,3)>max(self.rShoulder(3),self.lShoulder(3)),:);
             [val_HighestShoulder,idx_HighestShoulder] = min(v_aboveShoulder(:,3));
             [~,idx_TipHead] = max(v_aboveShoulder(:,3));
-            %[~,idx_HighestShoulder] = max(self.rShoulder(3),self.lShoulder(3));
             HeadShoulder_dist = v_aboveShoulder(idx_TipHead,:)-v_aboveShoulder(idx_HighestShoulder,:);
-            %HeadShoulder_dist = self.v(max(self.v(:,3)),:)-self.v(self.v(:,3)==max(self.rShoulder(3),self.lShoulder(3)),:);
-           % HeadShoulder_dist = self.v(max(self.v(:,3),2),:)-v_aboveShoulder(idx_HighestShoulder,:);
-            %dist = sqrt(HeadShoulder_dist(:,1)^2+HeadShoulder_dist(:,2)^2+HeadShoulder_dist(:,3)^2);
             dist = v_aboveShoulder(idx_TipHead,3)-v_aboveShoulder(idx_HighestShoulder,3);
 
             tmp = v_aboveShoulder(v_aboveShoulder(:,3)>val_HighestShoulder+dist*0.3,:);
@@ -1461,9 +1440,6 @@ classdef Avatar
             volume.total = sum(SignedVolumeOfTriangle(v1,v2,v3));
             surface.total = sum(normAll(crossAll(v2-v1,v3-v1)))/2;
             
-            %self.f = fixFaceOrientation(self.f,self.v);
-
-            
             %% if we want to get only the SA: 
             
             [surface.trunk] = getSurfaceAreaPartial(self,self.trunkIdx,0);
@@ -1482,9 +1458,7 @@ classdef Avatar
             v3 = self.v(self.f(:,3),:);
             volume.total = sum(SignedVolumeOfTriangle(v1,v2,v3));
             surface.total = sum(normAll(crossAll(v2-v1,v3-v1)))/2;
-            
-            %self.f = fixFaceOrientation(self.f,self.v);
-     
+                 
             %% for Vol and SA: 
             [test_vol.lArm,volume.lArm, surface.lArm] = getSurfaceAreaAndVolumePartial(self,self.lArmIdx,6,volume.total);
             [test_vol.rArm,volume.rArm, surface.rArm] = getSurfaceAreaAndVolumePartial(self,self.rArmIdx,5,volume.total);
@@ -1499,7 +1473,6 @@ classdef Avatar
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %%% this will give you correct volume for both legs together:
-            %[test_vol.legs, volume.legs, surface.legs] = getSurfaceAreaAndVolumePartial(self,self.legIdx,3,volume.total);
             [surface.lleg] = getSurfaceAreaPartial(self,self.legIdx,1);
             [surface.rleg] = getSurfaceAreaPartial(self,self.legIdx,2);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1510,9 +1483,7 @@ classdef Avatar
         
         
         function [surface] = getSurfaceAreaPartial(self,indices,isleg)
-            
-            %self.f = fixFaceOrientation(self.f,self.v);
-            
+                        
             [faces,~] = getFaces(self.f,indices);
             v1 = self.v(faces(:,1),:);
             v2 = self.v(faces(:,2),:);
@@ -1541,9 +1512,7 @@ classdef Avatar
         end 
         
         function [test_vol, volume,surface] = getSurfaceAreaAndVolumePartial(self,indices,isleg,TotalBodyVolume)
-            
-            %self.f = fixFaceOrientation(self.f,self.v);
-            
+                        
             [faces,~] = getFaces(self.f,indices);
             v1 = self.v(faces(:,1),:);
             v2 = self.v(faces(:,2),:);
@@ -1585,9 +1554,7 @@ classdef Avatar
                     v2 = self.v(faces(:,2),:);
                     v3 = self.v(faces(:,3),:);
                 end
-                
-                %[list,bdyEdges,~,~] = getListOfHoles(faces,self.v);
-                
+                                
                 bdyEdges = getBoundaryEdges(faces);
                 
                 list = zeros(1,length(bdyEdges));
@@ -1655,15 +1622,12 @@ classdef Avatar
                     if (idx_101(1)==idx_101(2))
                         ver1 = edge1(2);
                         ver2 = edge1(1);
-                        %    closing_faces = [self.f(idx_edge1,2),self.f(idx_edge1,1),c];
                     elseif(idx_101(3)==idx_101(2))
                         ver1 = edge1(3);
                         ver2 = edge1(2);
-                        %     closing_faces = [self.f(idx_edge1,3),self.f(idx_edge1,2),c];
                     else
                         ver1 = edge1(1);
                         ver2 = edge1(3);
-                        %     closing_faces = [self.f(idx_edge1,1),self.f(idx_edge1,3),c];
                     end
                     holeEdges(1,:)=[ver1 ver2];
                     srtd_i = holeEdges;
@@ -1720,8 +1684,6 @@ classdef Avatar
                     if isleg == 2 || isleg == 1
                         HoleTop(end+1,2) = HoleTop(1,1);
                         HoleTop(end,1) = NaN;
-%                         HoleTop(end+1,1) = HoleTop(1,2);
-%                         HoleTop(end,2) = NaN;
                         HoleTopUniquetmp=unique(HoleTop);
                         
                         for m = 1:size(HoleTopUniquetmp)
@@ -1732,15 +1694,6 @@ classdef Avatar
                         
                         uniqueVertex = find(HoleTopUniquetmp(:,2)==1);
                         HoleTop(end,1) = HoleTopUniquetmp(uniqueVertex,1);
-%                         UniqueVertexIdx = HoleTopUniquetmp(uniqueVertex,1);
-%                         SumForPosition = sum(ismember(HoleTop,UniqueVertexIdx(1,1)),1);
-%                         if SumForPosition(1,1)==1
-%                             HoleTop(end,2)=UniqueVertexIdx(1,1);
-%                             HoleTop(end-1,1)=UniqueVertexIdx(2,1);
-%                         else
-%                             HoleTop(end,2)=UniqueVertexIdx(2,1);
-%                             HoleTop(end-1,1)=UniqueVertexIdx(1,1);
-%                         end
                         vA_hatL{1,2} = HoleTop(:,[1,2]);
                     end
                 end
@@ -1785,20 +1738,11 @@ classdef Avatar
                 
                 %figure;
                 ff = [faces;[vA_hatL{1,1}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,1}),1)]];
-                % hold on; patch('vertices',vv,'faces',ff,'FaceColor', 'y');
                 
                 if size(vA_hatL,2)>1
                     vv = [self.v;center(1,:);center(2,:)];
                     ff=[faces;[vA_hatL{1,2}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,2}),1)]];
-                    %  hold on; patch('vertices',vv,'faces',ff, 'FaceColor', 'y');
                 end
-                
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                %             f_tmp = [faces;[vA_hatL{1,1}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,1}),1)]];
-                %             if size(vA_hatL,2)>1
-                %                 f_tmp = [faces;[vA_hatL{1,1}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,1}),1)];[vA_hatL{1,2}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,2}),1)]];
-                %             end
                 
                 %%%%%%%%%%%%%%%%%%%%% SIMA
                 
@@ -1815,14 +1759,6 @@ classdef Avatar
                 flip_newF = ismember(new_faces1(:,[1,2]),edges,'rows')==1;
                 new_faces1(:,[1,2])=new_faces1(:,[2,1]);
                 %%%%%%%%%%%%%%
-                %             sumU = sum(w,2);
-                %             [~,e]=ismember(2,sumU);
-                %             [~,q]=ismember(new_faces(3,1),faces(e,:));
-                %             [~,g]= ismember(new_faces(3,2),faces(e,:));
-                %             if q+1 == g || g == q-2
-                %                 new_faces_tmp = [new_faces(:,2),new_faces(:,1),new_faces(:,3)];
-                %                 new_faces = new_faces_tmp;
-                %             end
                 
                 f_tmp = [faces; new_faces1];
                 new_faces2 = [];
@@ -1830,22 +1766,10 @@ classdef Avatar
                 if size(vA_hatL,2)>1
                     if (isleg==1 || isleg==2)
                         new_faces2 = [vA_hatL{1,2}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,2}),1)];
-                        
-                        %%%% checking the orientation of the new faces
-                        %                     [w,~]=ismember(faces,new_faces2(3,[1,2]));
-                        %                     sumU = sum(w,2);
-                        %                     [~,e]=ismember(2,sumU);
-                        %                     [~,q]=ismember(new_faces2(3,1),faces(e,:));
-                        %                     [~,g]= ismember(new_faces2(3,2),faces(e,:));
-                        %                     if q+1 == g || g == q-2
-                        %                         new_faces_tmp = [new_faces2(:,2),new_faces2(:,1),new_faces2(:,3)];
-                        %                         new_faces2 = new_faces_tmp;
-                        %                     end
                         edges = [faces(3,[1,2]);faces(3,[2,3]);faces(3,[3,1])];
                         flip_newF = ismember(new_faces2(:,[1,2]),edges,'rows')==1;
                         new_faces2(:,[1,2])=new_faces2(:,[2,1]);
                         
-                        %  new_faces = [new_faces(2:end,:);new_faces2(2:end,:)];
                         new_faces = [new_faces1;new_faces2];
                     else
                         new_faces = [[vA_hatL{1,1}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,1}),1)];[vA_hatL{1,2}(:,[1,2]) length(vv)*ones(length(vA_hatL{1,2}),1)]];
@@ -1854,45 +1778,8 @@ classdef Avatar
                     f_tmp = [faces;new_faces];
                 end
                 
-                %figure
-                %patch('vertices', vv, 'faces', [faces;new_faces1], 'FaceColor', 'y');
-                
-                %%%%%%%%%%%%%%%%%%%%%%%%
-                
-                %  bdyEdges = getBoundaryEdges(f_tmp);
-                
-                %             X = [v1(:,1);v2(:,1);v3(:,1)];
-                %             Y = [v1(:,2);v2(:,2);v3(:,2)];
-                %             Z = [v1(:,3);v2(:,3);v3(:,3)];
-                
-                
-                % [TriIdx, volume] = convhull(100+X,100+Y,100+Z);
-                %vv = vv;
-                
-                
-                %%%%%%%%%%%plotting
-                %              if isleg == 1
-                %                 figure; patch('vertices',vv,'faces',faces,'FaceColor', 'y');
-                %                 hold on; patch('vertices',vv,'faces',new_faces,'FaceColor', 'm');
-                %                 hold on; patch('vertices',vv,'faces',new_faces2,'FaceColor', 'g');
-                %                 %hold on; patch('vertices',vv,'faces',f_tmp);
-                %
-                %              elseif isleg == 2
-                %                 figure; patch('vertices',vv,'faces',faces,'FaceColor', 'y');
-                %                 hold on; patch('vertices',vv,'faces',new_faces,'FaceColor', 'm');
-                %                 hold on; patch('vertices',vv,'faces',new_faces2,'FaceColor', 'b');
-                %                 %hold on; patch('vertices',vv,'faces',f_tmp);
-                %
-                %              end
-                %%%%%%%%%%%%
-                
-                %              f_tmp = fixFaceOrientation2(f_tmp,vv);
-                
                 volume = vol_calc( vv, f_tmp, 1000000);
-                
-                %%%% may need to do the same for legs???
-                
-                %if  volume > (TotalBodyVolume)
+                            
                 if ~(isleg ==1 || isleg ==2)
                     f_tmp1 = [faces; new_faces1(:,[2,1,3])];
                     volume1 = vol_calc( vv, f_tmp1, 1000000 );
@@ -1904,7 +1791,6 @@ classdef Avatar
                         case 2
                             volumeNonShift = vol_calc( vv, f_tmp, 0 );
                     end
-                    %VolDifference  = [abs(volumeNonShift-volume1),abs(volumeNonShift-volume)];
                     [~,volDiff_case] = min([abs(volumeNonShift-volume1),abs(volumeNonShift-volume)]);
                     
                     switch volDiff_case
@@ -1942,10 +1828,6 @@ classdef Avatar
                     end
                     
                 end
-                %                  else
-                %                      test_vol = volume;
-                %                      volume = vol_calc( vv, f_tmp, 0 );
-                %                  end
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
@@ -1954,56 +1836,12 @@ classdef Avatar
                 test_vol = NaN;
             end
             
-            
-            %volume = abs(sum(SignedVolumeOfTriangle(v1,v2,v3)));
-            
-            %             if isleg == 4 % head
-            %                 if volume > (0.2*TotalBodyVolume)
-            %                     v1 = [self.v(faces(:,1),:); vert1];
-            %                     v2 = [self.v(faces(:,2),:); vert2];
-            %                     volume = abs(sum(SignedVolumeOfTriangle(100+v1,100+v2,v3+100)));
-            %                 end
-            %             elseif isleg == 2 % rLeg
-            %                  if volume > (0.35*TotalBodyVolume)
-            %                         srtd_i = vA_hatL{1,1};
-            %                         vert11 = self.v(srtd_i(:,1),:);
-            %                         vert12 = self.v(srtd_i(:,2),:);
-            %                         srtd_i = vA_hatL{1,2};
-            %                         vert21 = self.v(srtd_i(:,1),:);
-            %                         vert22 = self.v(srtd_i(:,2),:);
-            %                         v1 = [self.v(faces(:,1),:); vert12 ; vert22];
-            %                         v2 = [self.v(faces(:,2),:); vert11 ; vert21];
-            %                         v3 = [self.v(faces(:,3),:); repmat(center(1,:),length(vert11),1); repmat(center(2,:),length(vert21),1)];
-            %                         volume = abs(sum(SignedVolumeOfTriangle(100+v1,100+v2,100+v3)));
-            %                  end
-            %              elseif isleg == 1 % lLeg
-            %                  if volume > (0.35*TotalBodyVolume)
-            %                         srtd_i = vA_hatL{1,1};
-            %                         vert11 = self.v(srtd_i(:,1),:);
-            %                         vert12 = self.v(srtd_i(:,2),:);
-            %                         srtd_i = vA_hatL{1,2};
-            %                         vert21 = self.v(srtd_i(:,1),:);
-            %                         vert22 = self.v(srtd_i(:,2),:);
-            %                         v2 = [self.v(faces(:,2),:); vert12 ; vert22];
-            %                         v1 = [self.v(faces(:,1),:); vert11 ; vert21];
-            %                         v3 = [self.v(faces(:,3),:); repmat(center(1,:),length(vert11),1); repmat(center(2,:),length(vert21),1)];
-            %                         volume = abs(sum(SignedVolumeOfTriangle(100+v1,100+v2,100+v3)));
-            %                  end
-            %             elseif isleg == 5  % rArm
-            %                 if volume > (0.075*TotalBodyVolume)
-            %                     v1 = [self.v(faces(:,1),:); vert1];
-            %                     v2 = [self.v(faces(:,2),:); vert2];
-            %                     volume = abs(sum(SignedVolumeOfTriangle(100+v1,100+v2,100+v3)));
-            %                 end
-            %             end
-            
         end
         
         function [rwrist, lwrist,...
                   rWristGirth,lWristGirth,...
                   rwrist_front,rwrist_back,rwrist_lateral,rwrist_medial,...
                   lwrist_front,lwrist_back,lwrist_lateral,lwrist_medial] = getWrist(self)
-%         function [rwrist, lwrist,rWristGirth,lWristGirth,rwrist_ulnar,rwrist_radial,lwrist_ulnar,lwrist_radial] = getWrist(self)
 
             % finding hands
             [~,rHandIdx] = min(self.v(:,1));
@@ -2026,16 +1864,6 @@ classdef Avatar
             zStart = min(z(self.rArmIdx));
             zEnd = (2*zStart+max(z(self.rArmIdx)))/3;
             zStart = (3*zStart+zEnd)/4;
-            %z = self.v(:,3);
-            %%%temp%%%%
-% %             figure;
-% %             rightxyz = [x,y,z];
-% %             rightxyz(:,1) = rightxyz(:,1) - max(x(self.rArmIdx));
-% %             rightxyz(:,3) = rightxyz(:,3) - min(z(self.rArmIdx));
-% %             rArmFaces = getFaces(self,self.rArmIdx);
-% %             h_rArm = patch('vertices', rightxyz, 'faces', rArmFaces, 'FaceColor', 'm');
-% %             hold on;
-            %%%%%%%
             
             n = 20;
             zValue = linspace(zStart,zEnd,n);
@@ -2067,52 +1895,11 @@ classdef Avatar
                 [rWristGirth.templatePoints,rWristGirth.templateValue] = template_circumference( vOnLine);
             end
             
-% %             IdxVert = 0;
-% %             m=1;
-%             %[semimajor_axis, ~, ~, ~, ~] = ellipse_fit(x(vIdxOnLine{idx}),y(vIdxOnLine{idx}));
-%             PointsDiff = zeros(size(vIdxOnLine{idx},1),size(vIdxOnLine{idx},1));
-%             for m = 1:size(vIdxOnLine{idx},1)
-%                 PointsDiff(:,m) = sqrt(x(vIdxOnLine{idx}).^2+y(vIdxOnLine{idx}).^2+z(vIdxOnLine{idx}).^2) - sqrt(x(vIdxOnLine{idx}(m))^2+y(vIdxOnLine{idx}(m))^2+z(vIdxOnLine{idx}(m))^2);
-%                
-%                 %[~,IdxVert] = ismember(2*semimajor_axis, PointsDiff);
-%                 %m=m+1; 
-%             end 
-%             [IdxVert,m] = find(PointsDiff == max(max(PointsDiff)));
-%             Point1 = vIdxOnLine{idx}(m);
-%             Point2 = vIdxOnLine{idx}(IdxVert);
-%             if self.v(Point1,2) > self.v(Point2,2)
-%                 rwrist_ulnar = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 rwrist_radial = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             else
-%                 rwrist_radial = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 rwrist_ulnar = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             end 
-            
-            %%%temp%%%
-%             rightVOnLine = [x(vIdxOnLine{idx}),y(vIdxOnLine{idx})];
-%             rightb = b;
-            %%%%%%
-            
             % left arm
             [x,z] = rotate_person(self.v(:,1),self.v(:,3),-theta_l);
             zStart = min(z(self.lArmIdx));
             zEnd = (2*zStart+max(z(self.lArmIdx)))/3;
             zStart = (3*zStart+zEnd)/4;
-            
-            %%%temp%%%%
-%             leftxyz = [x,y,z];
-%             leftxyz(:,1) = leftxyz(:,1) - min(x(self.lArmIdx));
-%             leftxyz(:,3) = leftxyz(:,3) - min(z(self.lArmIdx));
-%             lArmFaces = getFaces(self,self.lArmIdx);
-%             h_lArm = patch('vertices', leftxyz, 'faces', lArmFaces, 'FaceColor', 'y');
-%             set(h_lArm,'LineStyle','none')
-%             set(h_rArm,'LineStyle','none')
-%             axis equal;
-%             light('Position',[-50,-50,50],'Style','infinite');
-%             light('Position',[50,50,50],'Style','infinite');
-%             lighting phong;
-%             view([0 0]);
-            %%%%%%%
             
             n = 20;
             zValue = linspace(zStart,zEnd,n);
@@ -2144,46 +1931,12 @@ classdef Avatar
                 [lWristGirth.templatePoints,lWristGirth.templateValue] = template_circumference( vOnLine);
             end
             
-%               PointsDiff = zeros(size(vIdxOnLine{idx},1),size(vIdxOnLine{idx},1));
-%             for m = 1:size(vIdxOnLine{idx},1)
-%                 PointsDiff(:,m) = sqrt(x(vIdxOnLine{idx}).^2+y(vIdxOnLine{idx}).^2+z(vIdxOnLine{idx}).^2) - sqrt(x(vIdxOnLine{idx}(m))^2+y(vIdxOnLine{idx}(m))^2+z(vIdxOnLine{idx}(m))^2);
-%
-%                 %[~,IdxVert] = ismember(2*semimajor_axis, PointsDiff);
-%                 %m=m+1;
-%             end
-%             [IdxVert,m] = find(PointsDiff == max(max(PointsDiff)));
-%             Point1 = vIdxOnLine{idx}(m);
-%             Point2 = vIdxOnLine{idx}(IdxVert);
-%             if self.v(Point1,2) > self.v(Point2,2)
-%                 lwrist_ulnar = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 lwrist_radial = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             else
-%                 lwrist_radial = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 lwrist_ulnar = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             end
-            %%%temp%%%
-%             leftVOnLine = [x(vIdxOnLine{idx}),y(vIdxOnLine{idx})];
-%             leftb = b;
-%             figure;
-%             x = rightVOnLine(:,1); y = rightVOnLine(:,2);
-%             x = abs(x - max(x)); y = y - min(y);
-%             plot(x,y,'.','color','r');
-%             hold on;
-%             plot(x(rightb),y(rightb),'-','color','r');
-%             x = leftVOnLine(:,1); y = leftVOnLine(:,2);
-%             x = x - min(x); y = y - min(y);
-%             plot(x,y,'.','color','b');
-%             plot(x(leftb),y(leftb),'-','color','b');
-%             axis equal;
-            %%%%%%
-            
         end
         
         function [rwrist, lwrist,...
                   rWristGirth,lWristGirth,...
                   rwrist_front,rwrist_back,rwrist_lateral,rwrist_medial,...
                   lwrist_front,lwrist_back,lwrist_lateral,lwrist_medial] = getWrist_old(self)
-%         function [rwrist, lwrist,rWristGirth,lWristGirth,rwrist_ulnar,rwrist_radial,lwrist_ulnar,lwrist_radial] = getWrist(self)
 
             % finding hands
             [~,rHandIdx] = min(self.v(:,1));
@@ -2206,16 +1959,6 @@ classdef Avatar
             zStart = min(z(self.rArmIdx));
             zEnd = (3*zStart+max(z(self.rArmIdx)))/4;
             zStart = (3*zStart+zEnd)/4;
-            %z = self.v(:,3);
-            %%%temp%%%%
-% %             figure;
-% %             rightxyz = [x,y,z];
-% %             rightxyz(:,1) = rightxyz(:,1) - max(x(self.rArmIdx));
-% %             rightxyz(:,3) = rightxyz(:,3) - min(z(self.rArmIdx));
-% %             rArmFaces = getFaces(self,self.rArmIdx);
-% %             h_rArm = patch('vertices', rightxyz, 'faces', rArmFaces, 'FaceColor', 'm');
-% %             hold on;
-            %%%%%%%
             
             n = 20;
             zValue = linspace(zStart,zEnd,n);
@@ -2245,52 +1988,11 @@ classdef Avatar
                 [rWristGirth.templatePoints,rWristGirth.templateValue] = template_circumference( vOnLine);
             end
             
-% %             IdxVert = 0;
-% %             m=1;
-%             %[semimajor_axis, ~, ~, ~, ~] = ellipse_fit(x(vIdxOnLine{idx}),y(vIdxOnLine{idx}));
-%             PointsDiff = zeros(size(vIdxOnLine{idx},1),size(vIdxOnLine{idx},1));
-%             for m = 1:size(vIdxOnLine{idx},1)
-%                 PointsDiff(:,m) = sqrt(x(vIdxOnLine{idx}).^2+y(vIdxOnLine{idx}).^2+z(vIdxOnLine{idx}).^2) - sqrt(x(vIdxOnLine{idx}(m))^2+y(vIdxOnLine{idx}(m))^2+z(vIdxOnLine{idx}(m))^2);
-%                
-%                 %[~,IdxVert] = ismember(2*semimajor_axis, PointsDiff);
-%                 %m=m+1; 
-%             end 
-%             [IdxVert,m] = find(PointsDiff == max(max(PointsDiff)));
-%             Point1 = vIdxOnLine{idx}(m);
-%             Point2 = vIdxOnLine{idx}(IdxVert);
-%             if self.v(Point1,2) > self.v(Point2,2)
-%                 rwrist_ulnar = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 rwrist_radial = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             else
-%                 rwrist_radial = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 rwrist_ulnar = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             end 
-            
-            %%%temp%%%
-%             rightVOnLine = [x(vIdxOnLine{idx}),y(vIdxOnLine{idx})];
-%             rightb = b;
-            %%%%%%
-            
             % left arm
             [x,z] = rotate_person(self.v(:,1),self.v(:,3),-theta_l);
             zStart = min(z(self.lArmIdx));
             zEnd = (3*zStart+max(z(self.lArmIdx)))/4;
             zStart = (3*zStart+zEnd)/4;
-            
-            %%%temp%%%%
-%             leftxyz = [x,y,z];
-%             leftxyz(:,1) = leftxyz(:,1) - min(x(self.lArmIdx));
-%             leftxyz(:,3) = leftxyz(:,3) - min(z(self.lArmIdx));
-%             lArmFaces = getFaces(self,self.lArmIdx);
-%             h_lArm = patch('vertices', leftxyz, 'faces', lArmFaces, 'FaceColor', 'y');
-%             set(h_lArm,'LineStyle','none')
-%             set(h_rArm,'LineStyle','none')
-%             axis equal;
-%             light('Position',[-50,-50,50],'Style','infinite');
-%             light('Position',[50,50,50],'Style','infinite');
-%             lighting phong;
-%             view([0 0]);
-            %%%%%%%
             
             n = 20;
             zValue = linspace(zStart,zEnd,n);
@@ -2319,39 +2021,6 @@ classdef Avatar
             if(self.circ_cpd)
                 [lWristGirth.templatePoints,lWristGirth.templateValue] = template_circumference( vOnLine);
             end
-            
-%               PointsDiff = zeros(size(vIdxOnLine{idx},1),size(vIdxOnLine{idx},1));
-%             for m = 1:size(vIdxOnLine{idx},1)
-%                 PointsDiff(:,m) = sqrt(x(vIdxOnLine{idx}).^2+y(vIdxOnLine{idx}).^2+z(vIdxOnLine{idx}).^2) - sqrt(x(vIdxOnLine{idx}(m))^2+y(vIdxOnLine{idx}(m))^2+z(vIdxOnLine{idx}(m))^2);
-%
-%                 %[~,IdxVert] = ismember(2*semimajor_axis, PointsDiff);
-%                 %m=m+1;
-%             end
-%             [IdxVert,m] = find(PointsDiff == max(max(PointsDiff)));
-%             Point1 = vIdxOnLine{idx}(m);
-%             Point2 = vIdxOnLine{idx}(IdxVert);
-%             if self.v(Point1,2) > self.v(Point2,2)
-%                 lwrist_ulnar = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 lwrist_radial = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             else
-%                 lwrist_radial = [self.v(Point1,1),self.v(Point1,2),self.v(Point1,3)];
-%                 lwrist_ulnar = [self.v(Point2,1),self.v(Point2,2),self.v(Point2,3)];
-%             end
-            %%%temp%%%
-%             leftVOnLine = [x(vIdxOnLine{idx}),y(vIdxOnLine{idx})];
-%             leftb = b;
-%             figure;
-%             x = rightVOnLine(:,1); y = rightVOnLine(:,2);
-%             x = abs(x - max(x)); y = y - min(y);
-%             plot(x,y,'.','color','r');
-%             hold on;
-%             plot(x(rightb),y(rightb),'-','color','r');
-%             x = leftVOnLine(:,1); y = leftVOnLine(:,2);
-%             x = x - min(x); y = y - min(y);
-%             plot(x,y,'.','color','b');
-%             plot(x(leftb),y(leftb),'-','color','b');
-%             axis equal;
-            %%%%%%
             
         end
         
@@ -2642,7 +2311,6 @@ classdef Avatar
         function calfGirth = calfGirthOther(self,zValue,angle,legVal)
             [x,z] = rotate_person(self.v(:,1),self.v(:,3),angle);
             y = self.v(:,2);
-%             [y,~] = rotate_person(self.v(:,2),self.v(:,3),angle);
             if legVal == 0
                 idx = find(self.v(:,1) > 0);
                 zStart = self.l_ankle(3);
@@ -2683,7 +2351,6 @@ classdef Avatar
                 angle = -theta;
                 [x,z] = rotate_person(self.v(:,1),self.v(:,3),angle);
                 y = self.v(:,2);
-%                 [y,~] = rotate_person(self.v(:,2),self.v(:,3),angle);
                 idx = find(self.v(:,1) > 0);
             else %Else right leg
                 p1 = [self.r_ankle(1),self.r_ankle(3)];
@@ -2694,7 +2361,6 @@ classdef Avatar
                 angle = theta;
                 [x,z] = rotate_person(self.v(:,1),self.v(:,3),angle);
                 y = self.v(:,2);
-%                 [y,~] = rotate_person(self.v(:,2),self.v(:,3),angle);
                 idx = find(self.v(:,1) < 0);
             end
             % We compare the girth for n slices of the leg from zStart to
@@ -2849,40 +2515,7 @@ classdef Avatar
             values.lArmSA = self.surfaceArea.lArm;
             values.rArmSA = self.surfaceArea.rArm;
             values.lLegSA = self.surfaceArea.lLeg;
-            values.rLegSA = self.surfaceArea.rLeg;
-            
-            %%%%% temp
-%             values.chestCircumference = self.chestCircumference.value;
-%             values.waistCircumference = self.waistCircumference.value;
-%             values.hipCircumference = self.hipCircumference.value;
-%             values.rThighGirth = self.rThighGirth.value;
-%             values.lThighGirth = self.lThighGirth.value;
-%             values.rCalfCircumference = self.rCalfCircumference.value;
-%             values.lCalfCircumference = self.lCalfCircumference.value;
-%             values.l_wristgirth = self.l_wristgirth.value;
-%             values.rWristGirth = self.r_wristgirth.value;
-%             values.rForearmGirth = self.r_forearmgirth.value;
-%             values.lForearmGirth = self.l_forearmgirth.value;
-%             values.rBicepGirth = self.r_bicepgirth.value;
-%             values.lBicepGirth = self.l_bicepgirth.value;
-%             values.rAnkleGirth = self.r_ankle_girth.value;
-%             values.lAnkleGirth = self.l_ankle_girth.value;
-%             values.lArmLength = self.leftArmLength;
-%             values.rArmLength = self.rightArmLength;
-%             values.trunkLength = self.trunkLength;
-%             values.lLegLength = self.lLegLength;
-%             values.rLegLength = self.rLegLength;
-%             values.crotchHeight = self.crotchHeight;
-%             values.collarScalpLength = self.collarScalpLength;
-%             values.volume = self.volume;
-%             values.surfaceArea = self.surfaceArea.total;
-%             values.headSA = self.surfaceArea.head;
-%             values.trunkSA = self.surfaceArea.trunk;
-%             values.lArmSA = self.surfaceArea.lArm;
-%             values.rArmSA = self.surfaceArea.rArm;
-%             values.lLegSA = self.surfaceArea.lLeg;
-%             values.rLegSA = self.surfaceArea.rLeg;
-            
+            values.rLegSA = self.surfaceArea.rLeg;        
         end
         
         function values = extractEllipseValues(self)
@@ -3058,9 +2691,7 @@ classdef Avatar
             gca.GridLineStyle = 'none';
             gca.LineStyle = 'none';
             gca.LineColor = [1 1 1];
-            
-            %set(gca,'GridLineStyle', 'none','Colormap',[1 1 1])
-            
+                        
             subplot(1,2,1)
             title('Front view')
             hold on
@@ -3116,7 +2747,6 @@ classdef Avatar
                 keyPoints = true;
             end
 
-            %figure; plot(self.v(:, 1),self.v(:, 3),'.');hold on;
             if keyPoints == true
                 plot(self.r_wrist(1), self.r_wrist(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
                 plot(self.r_armpit(1), self.r_armpit(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
@@ -3125,8 +2755,6 @@ classdef Avatar
                 plot(self.l_wrist(1), self.l_wrist(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
                 plot(self.l_hip(1), self.l_hip(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
                 plot(self.crotch(1), self.crotch(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
-%                 plot(self.k10(1), self.k10(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
-%                 plot(self.k11(1), self.k11(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
                 plot(self.lShoulder(1), self.lShoulder(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
                 plot(self.rShoulder(1), self.rShoulder(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
                 plot(self.l_ankle(1), self.l_ankle(3),'r--o','LineWidth',4,'MarkerSize',2); hold on;
@@ -3138,8 +2766,7 @@ classdef Avatar
         end
         
         function plot3d(self)
-        % Plots the avatar in 3D
-%             figure;
+        % Plots the avatar in 3D figure
             lArmVertices = self.v(self.lArmIdx,:);
             plot3(lArmVertices(:,1),lArmVertices(:,2),lArmVertices(:,3),'.'); hold on;
             rArmVertices = self.v(self.rArmIdx,:);
@@ -3293,8 +2920,6 @@ classdef Avatar
                     plot(axes,self.l_wrist(1), self.l_wrist(3),'g--o','LineWidth',4,'MarkerSize',2);
                     plot(axes,self.l_hip(1), self.l_hip(3),'g--o','LineWidth',4,'MarkerSize',2); 
                     plot(axes,self.crotch(1), self.crotch(3),'g--o','LineWidth',4,'MarkerSize',2);
-%                     plot(axes,self.k10(1), self.k10(3),'g--o','LineWidth',4,'MarkerSize',2); 
-%                     plot(axes,self.k11(1), self.k11(3),'g--o','LineWidth',4,'MarkerSize',2); 
                     plot(axes,self.lShoulder(1), self.lShoulder(3),'g--o','LineWidth',4,'MarkerSize',2); 
                     plot(axes,self.rShoulder(1), self.rShoulder(3),'g--o','LineWidth',4,'MarkerSize',2); 
                     plot(axes,self.collar(1), self.collar(3),'g--o','LineWidth',4,'MarkerSize',2);
@@ -3412,34 +3037,6 @@ classdef Avatar
                            both_legs; topIdx];
             centerIdx(nonCenterIdx) = [];            
             centerFaces = getFaces(self.f, centerIdx);
-            
-%             figure; hold on;
-%             patch('vertices', self.v, 'faces', lArmFaces, 'FaceColor', 'y','LineStyle','none');
-%             patch('vertices', self.v, 'faces', rArmFaces, 'FaceColor', 'm','LineStyle','none');
-%             patch('vertices', self.v, 'faces', topFaces, 'FaceColor', 'c','LineStyle','none');
-%             patch('vertices', self.v, 'faces', lLegFaces, 'FaceColor', 'g','LineStyle','none');
-%             patch('vertices', self.v, 'faces', rLegFaces, 'FaceColor', 'r','LineStyle','none');
-%             patch('vertices', self.v, 'faces', centerFaces, 'FaceColor', 'b','LineStyle','none');
-% 
-%             patch(self.r_wristgirth.points(:,1),self.r_wristgirth.points(:,2),self.r_wristgirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.l_wristgirth.points(:,1),self.l_wristgirth.points(:,2),self.l_wristgirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.hipCircumference.points(:,1),self.hipCircumference.points(:,2),self.hipCircumference.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.waistCircumference.points(:,1),self.waistCircumference.points(:,2),self.waistCircumference.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.r_ankle_girth.points(:,1),self.r_ankle_girth.points(:,2),self.r_ankle_girth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.l_ankle_girth.points(:,1),self.l_ankle_girth.points(:,2),self.l_ankle_girth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.rCalfCircumference.points(:,1),self.rCalfCircumference.points(:,2),self.rCalfCircumference.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.lCalfCircumference.points(:,1),self.lCalfCircumference.points(:,2),self.lCalfCircumference.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.rThighGirth.points(:,1),self.rThighGirth.points(:,2),self.rThighGirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.lThighGirth.points(:,1),self.lThighGirth.points(:,2),self.lThighGirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.r_forearmgirth.points(:,1),self.r_forearmgirth.points(:,2),self.r_forearmgirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.l_forearmgirth.points(:,1),self.l_forearmgirth.points(:,2),self.l_forearmgirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.r_bicepgirth.points(:,1),self.r_bicepgirth.points(:,2),self.r_bicepgirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.l_bicepgirth.points(:,1),self.l_bicepgirth.points(:,2),self.l_bicepgirth.points(:,3),'k','EdgeColor','k','LineWidth',.2)
-%             patch(self.chestCircumference.points(:,1),self.chestCircumference.points(:,2),self.chestCircumference.points(:,3),'k','EdgeColor','k','LineWidth',.2)       
-%             
-%             light('Position',[-50,-50,50],'Style','infinite');
-%             light('Position',[50,50,50],'Style','infinite');
-%             lighting phong;
         end
     end
 end
@@ -3487,8 +3084,6 @@ function output = sosmooth3(x,N) %%N is odd
 end
 function v = crossAll(v1,v2)
     % Finds the cross product for all pairs
-    % v(1,:) = cross(v1(1,:),v2(1,:))
-    % ...
     v = NaN(length(v1),3);
     v(:,1) = v1(:,2).*v2(:,3)-v2(:,2).*v1(:,3);
     v(:,2) = v1(:,3).*v2(:,1)-v2(:,3).*v1(:,1);
@@ -3504,13 +3099,6 @@ function [c,b] = getCircumference(x,y)
     c = sum(normAll(t_boundary(1:end-1,:)-t_boundary(2:end,:)));
 end
 function [volume] = SignedVolumeOfTriangle(v1,v2,v3)
-%     v321 = v3(:,1) .* v2(:,2) .* v1(:,3);
-%     v231 = v2(:,1) .* v3(:,2) .* v1(:,3);
-%     v312 = v3(:,1) .* v1(:,2) .* v2(:,3);
-%     v132 = v1(:,1) .* v3(:,2) .* v2(:,3);
-%     v213 = v2(:,1) .* v1(:,2) .* v3(:,3);
-%     v123 = v1(:,1) .* v2(:,2) .* v3(:,3);
-%     volume = (1/6)*(-v321+v231+v312-v132-v213+v123);
     volume=(1/6)*dot(cross(v1,v2),v3);
 end
 function bdyEdges = getBoundaryEdges(faces)
@@ -3555,14 +3143,6 @@ function [f,v] = removeBoundaryProblems(f,v)
     end
 end
 function list = findHoles(bdyEdges)
-%     pCases = [];
-% 
-%     vertices = unique([bdyEdges(:,1);bdyEdges(:,2)]);
-%     for vertex = vertices'
-%         if sum(sum(bdyEdges == vertex)) == d
-%             pCases = [pCases;vertex];
-%         end
-%     end
     list = zeros(1,length(bdyEdges));
     holeNum = 1;
     row = 1;
@@ -3635,10 +3215,6 @@ function [vertex,face] = read_ply(filename)
 %
 %   'vertex' is a 'nb.vert x 3' array specifying the position of the vertices.
 %   'face' is a 'nb.face x 3' array specifying the connectivity of the mesh.
-%
-%   IMPORTANT: works only for triangular meshes.
-%
-%   Copyright (c) 2003 Gabriel Peyr?
 
 [d,c] = plyread(filename);
 try
@@ -3757,29 +3333,28 @@ function obj = readObj(fname)
     obj.v = v; obj.f = f;
 end
 function [Elements,varargout] = plyread(Path,Str)
-%PLYREAD   Read a PLY 3D data file.
-%   [DATA,COMMENTS] = PLYREAD(FILENAME) reads a version 1.0 PLY file
-%   FILENAME and returns a structure DATA.  The fields in this structure
-%   are defined by the PLY header; each element type is a field and each
-%   element property is a subfield.  If the file contains any comments,
-%   they are returned in a cell string array COMMENTS.
-%
-%   [TRI,PTS] = PLYREAD(FILENAME,'tri') or
-%   [TRI,PTS,DATA,COMMENTS] = PLYREAD(FILENAME,'tri') converts vertex
-%   and face data into triangular connectivity and vertex arrays.  The
-%   mesh can then be displayed using the TRISURF command.
-%
-%   Note: This function is slow for large mesh files (+50K faces),
-%   especially when reading data with list type properties.
-%
-%   Example:
-%   [Tri,Pts] = PLYREAD('cow.ply','tri');
-%   trisurf(Tri,Pts(:,1),Pts(:,2),Pts(:,3)); 
-%   colormap(gray); axis equal;
-%
-%   See also: PLYWRITE
 
-% Pascal Getreuer 2004
+        %PLYREAD   Read a PLY 3D data file.
+        %   [DATA,COMMENTS] = PLYREAD(FILENAME) reads a version 1.0 PLY file
+        %   FILENAME and returns a structure DATA.  The fields in this structure
+        %   are defined by the PLY header; each element type is a field and each
+        %   element property is a subfield.  If the file contains any comments,
+        %   they are returned in a cell string array COMMENTS.
+        %
+        %   [TRI,PTS] = PLYREAD(FILENAME,'tri') or
+        %   [TRI,PTS,DATA,COMMENTS] = PLYREAD(FILENAME,'tri') converts vertex
+        %   and face data into triangular connectivity and vertex arrays.  The
+        %   mesh can then be displayed using the TRISURF command.
+        %
+        %   Note: This function is slow for large mesh files (+50K faces),
+        %   especially when reading data with list type properties.
+        %
+        %   Example:
+        %   [Tri,Pts] = PLYREAD('cow.ply','tri');
+        %   trisurf(Tri,Pts(:,1),Pts(:,2),Pts(:,3)); 
+        %   colormap(gray); axis equal;
+        %
+        %   See also: PLYWRITE
 
 [fid,Msg] = fopen(Path,'rt');	% open file in read text mode
 
@@ -4246,10 +3821,6 @@ function [addf,f,v] = meshRepair(f,v)
         %[fitPoly,p] = fitPolyToHole(f,v,holeEdges,d);
     end
 
-    % Filling the holes:
-%     for z=1:size(vA_hatL,2)
-%         A(z,1)=size(vA_hatL{1,z},1);
-%     end
     [~,addf,v,f]=holeFilling_Fit3D(f,vA_hatL,v,holeEdges,d);
    
    [list,bdyEdges,f,v] = getListOfHoles(f,v);
@@ -4281,11 +3852,9 @@ end
 v1 = permute(Bdry_info(:,1,2:4),[1,3,2]);
 v2 = permute(Bdry_info(:,2,2:4),[1,3,2]);
 epsilon = mean(sqrt(sum((v2'-v1').^ 2))/2);
-%epsilon = prctile(sqrt(sum((v2-v1).^ 2,2)),10)/10;
 
 first_edges = sort(Bdry_info(:,[1,2],1),2);
 
- %%
 num_e=1;
 while(size(Bdry_info,1)>=num_e)
     e1=permute(Bdry_info(num_e,2,2:end)-Bdry_info(num_e,1,2:end),[1,3,2]);
@@ -4299,8 +3868,6 @@ while(size(Bdry_info,1)>=num_e)
         e2 = permute(Bdry_info(num_e+1,2,2:end)-Bdry_info(num_e+1,1,2:end),[1,3,2]);
         ver3=permute(Bdry_info(num_e+1,2,2:end),[1,3,2]);
     end
-%     CosBeta = dot(e1,e2)/(norm(e1)*norm(e2));
-%     Beta = acosd(CosBeta);
     Beta=rad2deg(anglePoints3d(ver1,ver2,ver3));
     sz_BI = size(Bdry_info,1);
     if(Beta<20)
@@ -4326,24 +3893,14 @@ while(size(Bdry_info,1)>=num_e)
             if ((num_e == 1) || (num_e == sz_BI) || (num_e == sz_BI-1))                        
                 f(f== Bdry_info(end,2,1)) = Bdry_info(1,1,1);
                 AvV(Bdry_info(end,2,1),:) = NaN;
-    %             if(Bdry_info(end,2,1)==327769)
-    %                 sima=0;
-    %             end
                 for qq = q+1 : size(vA_hat,2)
                     vA_hat{1,qq}(vA_hat{1,qq}== Bdry_info(end,2,1)) = Bdry_info(1,1,1);
                 end
                 Bdry_info(end,2,:) = Bdry_info(1,1,:);
                 num_e = num_e - 1;
             else
-    %            try 
                 f(f==Bdry_info(num_e-1,2,1)) = Bdry_info(num_e,1,1);
-    %             catch
-    %                 md=0;
-    %             end 
                 AvV(Bdry_info(num_e-1,2,1),:) = NaN;
-    %             if(Bdry_info(num_e-1,2,1)==327769)
-    %                 sima=0;vc
-    %             end
                 for qq = q+1 : size(vA_hat,2)
                     vA_hat{1,qq}(vA_hat{1,qq}== Bdry_info(num_e-1,2,1)) = Bdry_info(num_e,1,1);
                 end
@@ -4353,10 +3910,8 @@ while(size(Bdry_info,1)>=num_e)
         end
     elseif(Beta<90)
         if (num_e == size(Bdry_info,1))
-            %dist = sqrt(sum((Bdry_info(num_e,1,:).^2 - Bdry_info(1,2,:)).^2))/3;
             dist= distancePoints(Bdry_info(num_e,1,:),Bdry_info(1,2,:));
         else
-            %dist = sqrt(sum((Bdry_info(num_e,1,:).^2 - Bdry_info(num_e+1,2,:)).^2))/3;
             dist= distancePoints(Bdry_info(num_e,1,:),Bdry_info(num_e+1,2,:));
         end
         if(abs(dist)<7*epsilon)
@@ -4395,8 +3950,6 @@ if(~isempty(Bdry_info))
 
     Normv1v2=sqrt((v1v2(:,1)).^2+(v1v2(:,2)).^2+(v1v2(:,3)).^2);
      epsilon=mean(Normv1v2(:,1))/2;
-%     epsilon = epsilon ./ 2;
-   %epsilon = prctile(Normv1v2,10)/2;
 
     Bdry_info_tmp=Bdry_info;
 
@@ -4410,7 +3963,6 @@ if(~isempty(Bdry_info))
 %tmp_size1 = 1;
 %tmp_size2 = size(vA_hat_q,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     hold on 
 end
 
 while(size(Bdry_info,1)>3)
@@ -4451,7 +4003,6 @@ while(size(Bdry_info,1)>3)
                     tmp(4,2,:)=Bdry_info(j,2,:);
                     tmp(4,3,:)=Bdry_info(1,5,:);
                     tmp(4,3,2:4)=Bdry_info(1,5,2:4);
-%                     tmp(4,3,1)=size(AvV,1)+1;
                     tmp(4,5,:)=Inf; 
                                         
                     if(tmp(2,1,:) == tmp(2,2,:)) 
@@ -4497,18 +4048,8 @@ while(size(Bdry_info,1)>3)
             vA_hat_q=[vA_hat_q;sort(tmp(4,1:3,1),2)];
 
             Bdry_info_tmp2 = sort(Bdry_info(:,1:3,1),2); %indx sorted
-            %tmp_size1 = size(vA_hat_q,1);
             vA_hat_q = [vA_hat_q;Bdry_info_tmp2];
-%             % TRY
-%             vA_hat_q=sort(vA_hat_q,2);
-            %%
             vA_hat_q = unique(vA_hat_q,'rows');
-            
-%             if vA_hat_q(1,1)==0
-%                 vA_hat_q(1,1)=max(max(vA_hat_q));
-%             end
-            
-            %tmp_size2 = size(vA_hat_q,1);
 
             j5=2;
             cntr6=0;
@@ -4638,10 +4179,6 @@ function [list,bdyEdges,f,v] = getListOfHoles(f,v)
     badVertices = u(counts~=2); % vertices that did not occur twice
     
     if ~isempty(u(counts>2))
-%         [~,rangeF] = getFaces(f,find(bdyEdges(:)));
-%         figure;
-%         plotAva(f(rangeF,:),v,'r')
-%         stop = 1;
     end
     
     
@@ -4656,9 +4193,6 @@ function [list,bdyEdges,f,v] = getListOfHoles(f,v)
                 marcelline = 1;
             end
             badFaceIdx = find((sum(f == e(1),2) + sum(f == e(2),2)) == 2);
-%             fprintf('Edge %d %d\n',e(1),e(2))
-%             fprintf('Face %d %d %d\n',f(badFaceIdx,1),f(badFaceIdx,2),f(badFaceIdx,3))
-                         
             faceToRemove = [faceToRemove badFaceIdx]; %%% unique added
 
         end
@@ -4691,17 +4225,6 @@ function [list,bdyEdges,f,v] = getListOfHoles(f,v)
     catch ME
         warning('An error occurred in getListOfHoles with message: %s', ME.message)
     end
-    % attachedHole_f = find(counts==2);
-    % if (~isempty(attachedHole_f))
-    %     f(attachedHole_f,:) = [];
-    % end
-    % if (~isempty(isolated_f) || ~isempty(attachedHole_f))
-    %     f(remove_f,:) = [];
-    %     E = sort([f(:,[1,2]); f(:,[2,3]); f(:,[1,3])],2);
-    %     [u,~,n] = unique(E,'rows');
-    %     counts = accumarray(n(:), 1);
-    %     bdyEdges = u(counts==1,:);
-    % end
 
     % Group boundary edges together
     list = zeros(1,length(bdyEdges));
@@ -4858,7 +4381,6 @@ function alpha = anglePoints3d(varargin)
 %   04/01/2007: check typo
 %   27/05/2014: adjust known vector sizes n1, n0, n2 once corrected for
 
-
 p2 = [0 0 0];
 if length(varargin) == 1
     pts = varargin{1};
@@ -4964,15 +4486,6 @@ function c = vectorCross3d(a,b)
 %      float: double, single
 %
 %   See also DOT.
-
-%   Sven Holcombe
-
-% needed_colons = max([3, length(size(a)), length(size(b))]) - 3;
-% tmp_colon = {':'};
-% clnSet = tmp_colon(ones(1, needed_colons));
-% 
-% c = bsxfun(@times, a(:,[2 3 1],clnSet{:}), b(:,[3 1 2],clnSet{:})) - ...
-%     bsxfun(@times, b(:,[2 3 1],clnSet{:}), a(:,[3 1 2],clnSet{:}));
 
 sza = size(a);
 szb = size(b);
@@ -5184,9 +4697,6 @@ else
         % Compute difference of coordinate for each pair of point
         % and for each dimension. -> dist is a [n1*n2] array.
         for i = 1:d
-            % equivalent to:
-            % dist = dist + ...
-            %   (repmat(p1(:,i), [1 n2])-repmat(p2(:,i)', [n1 1])).^2;
             dist = dist + bsxfun (@minus, p1(:,i), p2(:, i)').^2;
         end
         dist = sqrt(dist);
@@ -5200,9 +4710,6 @@ else
     else
         % compute distance using the specified norm.
         for i = 1:d
-            % equivalent to:
-            % dist = dist + power((abs(repmat(p1(:,i), [1 n2]) - ...
-            %     repmat(p2(:,i)', [n1 1]))), norm);
             dist = dist + power(abs(bsxfun(@minus, p1(:,i), p2(:, i)')), norm);
         end
         dist = power(dist, 1/norm);
@@ -5252,8 +4759,6 @@ function [Bdry_info,Bdry_info_tmp,j,i]=FillHoles_Fit3D(v,f,Bdry_info_tmp,Bdry_in
 
     %%                       
                         if (NormvAvA < 1.5*epsilon && NormV1VA < epsilon)
-%                         if mn_val < 1.2*epsilon
-%                             if (mn_indx==3) %C1
                                 tmp = Bdry_info(j-1:j,:,:);
                                 tmp(1,2,:)=Bdry_info(j-1,5,:); 
                                 tmp(1,3,:)=Bdry_info(j-1,2,:);
@@ -5261,7 +4766,6 @@ function [Bdry_info,Bdry_info_tmp,j,i]=FillHoles_Fit3D(v,f,Bdry_info_tmp,Bdry_in
                                 tmp(2,1,:)=Bdry_info(j-1,5,:);   
                                 tmp(2,3,:)=Bdry_info(j-1,2,:);
                                 tmp(2,5,:)=Inf;
-%                                 if i~=size(Bdry_info,1)
                                 Bdry_info_tmp = [Bdry_info_tmp(1:i-2,:,:);tmp;Bdry_info_tmp(i+1:end,:,:)]; 
                                 Bdry_info(j,5,:) = tmp(2,1,:);
                         else
@@ -5332,12 +4836,8 @@ function thirdV = getThirdV(f,v,holeEdges,fitPoly,p)
     % 0.75. Not sure how it is done before. Feel free to change.
     v1 = v(holeEdges(:,1),:);
     v2 = v(holeEdges(:,2),:);
- % epsilon = mean(sqrt(sum((v2'-v1').^ 2)))/3.5; %% Fit3D
     epsilon = mean(sqrt(sum((v2'-v1').^ 2)))/6; 
 
-    %epsilon = prctile(sqrt(sum((v2-v1).^ 2,2)),5);
-    %epsilon = median(sqrt(sum((v2'-v1').^ 2)))/80;
-    
     len = length(holeEdges);
     thirdV = zeros(len,3); % This will store the third vertex
     eMid = zeros(len,3); % Midpoint of boudnary edges
@@ -5378,21 +4878,6 @@ function thirdV = getThirdV(f,v,holeEdges,fitPoly,p)
             stop =1;
         end
     end
-    
-%     % Compare normals and merge thrid vertices if needed
-%     gamma = 0.8;
-%     crossOfNormal = normAll(cross(n(:,:),n([2:len,1],:)));
-%     for j = 1:len
-%         if crossOfNormal(j) > gamma
-%             j1 = j;
-%             j2 = mod(j,len)+1;
-%             v1 = thirdV(j1,:);
-%             v2 = thirdV(j2,:);
-%             ave = (v1+v2)/2;
-%             thirdV(j1,:) = ave;
-%             thirdV(j2,:) = ave;
-%         end
-%     end
     
     % Reverse the orientation
     oReverse(p) = 1:length(p);
@@ -5619,9 +5104,6 @@ elseif length(varargin) == 2
     v0 = repmat([1 0 0], [size(p0, 1) 1]);
     inds = vectorNorm3d(cross(n, v0, 2))<1e-14;
     v0(inds, :) = repmat([0 1 0], [sum(inds) 1]);
-%     if abs(cross(n, v0, 2))<1e-14
-%         v0 = repmat([0 1 0], [size(p0, 1) 1]);
-%     end
     
     % create direction vectors
     v1 = normalizeVector3d(cross(n, v0, 2));
@@ -5813,18 +5295,14 @@ end
 function [f,v] = uselessFaceOmission(f,v)
 edges = [f(:,[1,2]); f(:,[2,3]); f(:,[1,3])];
 edges = sort(edges,2);
-% [unique_edges,~,rep_indx_e] = unique(edges,'rows');
 [~,~,rep_indx_e] = unique(edges,'rows');
 rep_indx = accumarray(rep_indx_e,1);
 rep_indx = find(rep_indx>2);
-%rep_indx = find(rep_indx==1);
 
 while (~isempty(rep_indx))
     sz_f = size(f,1);
     for i = 1:size(rep_indx,1)
-%         loc_rep = find(ismember(edges,unique_edges(rep_indx(i),:),'rows'));
         loc_rep = find(rep_indx_e == rep_indx(i));
-%         tmp = edges(loc_rep,:)
         mod_loc_rep = mod(loc_rep,sz_f);
         rep_faces = f(mod_loc_rep,:);
         idx = ~isnan(rep_faces(:,1));
@@ -5892,7 +5370,6 @@ while (~isempty(rep_indx))
     edges = [f(:,[1,2]); f(:,[2,3]); f(:,[1,3])];
     edges = sort(edges,2);
     [~,~,rep_indx_e] = unique(edges,'rows');
-%     [unique_edges,~,rep_indx_e] = unique(edges,'rows');
     rep_indx = accumarray(rep_indx_e,1);
     rep_indx = find(rep_indx>2);
 end
@@ -6149,7 +5626,6 @@ function [templatePoints,CircumferenceValue  ] = template_circumference(vOnLine)
             config.ctrl_pts = [gdX2D gdY2D];
             config.init_param = zeros(size(config.ctrl_pts));
             [~,templatePoints] = gmmreg_cpd(config);
-            %figure; plot(vOnLine(:,1), vOnLine(:,2),'.'); hold on; DisplayPoints(circumference.templatePoints,config.scene,2); hold off;
             [CircumferenceValue,~] = getCircumference(templatePoints(:,1),templatePoints(:,2));
             
 end
@@ -6159,7 +5635,6 @@ function [bodyPart_template_v,bodyPart_template_f] = fitting_templateToBodyParts
     bodyPart_template_f = zeros((n-2)*2*(l_circ_template-2),3);
     IdStart = 1;
     IdEnd = l_circ_template;
-%     for zValueId = 2:length(zValue_vec)-1
     for zValueId = 2:length(zValue_vec)        
         x_slice = x(vIdxOnLine{zValueId}); y_slice = y(vIdxOnLine{zValueId});
         slice = [x_slice y_slice];
@@ -6176,7 +5651,6 @@ function [bodyPart_template_v,bodyPart_template_f] = fitting_templateToBodyParts
         config.model = circ_template;
         config.scene = slice;           
         [~,matched_template] = gmmreg_cpd(config);
-    %                 DisplayPoints(matched_template,config.scene,2);    
         slice_template_v = [matched_template(:,1), matched_template(:,2), repmat(zValue_vec(zValueId),size(matched_template(:,1)))];
         bodyPart_template_v(IdStart:IdEnd,:) = slice_template_v;
         if(zValueId==2)
@@ -6199,13 +5673,9 @@ function [bodyPart_template_v,bodyPart_template_f] = fitting_templateToBodyParts
             %%%
             template_IdV_old_shifted = [template_IdV_old(2:end);template_IdV_old(1)];
             template_IdV_shifted = [template_IdV(2:end);template_IdV(1)];
-            bodyPart_template_f(st:ed,:) = [template_IdV_old,template_IdV,template_IdV_old_shifted];
-%             bodyPart_template_f(st - 1 + ((ed-st+1)/2),:) = []; ed = ed - 1;
-%             bodyPart_template_f(ed,:) = []; ed = ed - 1;            
+            bodyPart_template_f(st:ed,:) = [template_IdV_old,template_IdV,template_IdV_old_shifted];         
             st = ed + 1; ed = st + l_circ_template - 1;
-            bodyPart_template_f(st:ed,:) = [template_IdV,template_IdV_old_shifted,template_IdV_shifted];
-%             bodyPart_template_f(st - 1 + ((ed-st+1)/2),:) = []; ed = ed - 1;
-%             bodyPart_template_f(ed,:) = []; ed = ed - 1;           
+            bodyPart_template_f(st:ed,:) = [template_IdV,template_IdV_old_shifted,template_IdV_shifted];         
             st = ed + 1; ed = st + l_circ_template - 1;
             template_IdV_old = template_IdV;
         end
@@ -6218,7 +5688,6 @@ function [r_arm_template_v,r_arm_template_f,l_arm_template_v,l_arm_template_f] =
     circ_template = self.circ_template_s;
     l_circ_template = length(circ_template);
     l_circ_template_s = l_circ_template;
-%             l_circ_template_l = length(self.circ_template_l);
 
     % right arm
     x = self.v(:,1); y = self.v(:,2); z = self.v(:,3);
@@ -6230,29 +5699,18 @@ function [r_arm_template_v,r_arm_template_f,l_arm_template_v,l_arm_template_f] =
     n=(30/3)+1;
     zValue_vec = linspace(zStart,zEnd,n);
     [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, self.rArmIdx);
-%             start_vId = (40+40)/2*l_circ_template + (60+40)/2*l_circ_template_l;
-   % start_vId = 5*(2*1*42+1*2*42+1*4*30)*l_circ_template_s;
     start_vId = (1/3)*(2*1*42+1*2*42+1*4*30)*l_circ_template_s;
-
-%             tic;
     [r_arm_template_v,r_arm_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);
-%             toc
 
     % left arm
     z_larmpit = self.l_armpit(3);
     zStart = min(z(self.lArmIdx));
     zEnd = z_larmpit; 
 
-%             n = 32;
     zValue_vec = linspace(zStart,zEnd,n);
     [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, self.lArmIdx);
-%             start_vId = (40+40+20)/2*l_circ_template + (60+40)/2*l_circ_template_l;
-    %start_vId = 5*(2*1*42+1*2*42+1*4*30+1*1*30)*l_circ_template_s;
     start_vId = (1/3)*(2*1*42+1*2*42+1*4*30+1*1*30)*l_circ_template_s;
-
-%             tic;
     [l_arm_template_v,l_arm_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);
-%             toc
 end
 function [r_leg_template_v,r_leg_template_f,l_leg_template_v,l_leg_template_f] = templateFitting_leg(self)
 circ_template = self.circ_template_s;
@@ -6265,7 +5723,6 @@ circ_template = self.circ_template_s;
     zEnd = z_crotch;
     x_crotch = self.crotch(1);
     x_r = x <= x_crotch; x_l = x > x_crotch;
-    %n = (42*5)+1;
     n = (42/3)+1;
     zValue_vec = linspace(zStart,zEnd,n);
 
@@ -6273,28 +5730,21 @@ circ_template = self.circ_template_s;
     keepIdx = 1:length(self.v);
     keepIdx(x_l) = [];
     keepIdx = keepIdx(~ismember(keepIdx,self.rArmIdx));
-%             keepIdx = keepIdx(~ismember(keepIdx,self.lArmIdx));
     [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, keepIdx);     
     start_vId = 0;
-%             tic;
     [r_leg_template_v,r_leg_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);        
-%             toc
 
     % left leg
     keepIdx = 1:length(self.v);
     keepIdx(x_r) = [];
     keepIdx = keepIdx(~ismember(keepIdx,self.lArmIdx));
     [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, keepIdx);     
-    %start_vId = 5*(1*1*42) * l_circ_template_s;
     start_vId = (1/3)*(1*1*42) * l_circ_template_s;
     
-%             tic;
     [l_leg_template_v,l_leg_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);             
-%             toc
 end
 function [trunk_template_v,trunk_template_f] = templateFitting_trunk(self)
     circ_template = self.circ_template_l;
-%             l_circ_template = length(circ_template);
     l_circ_template_s = length(self.circ_template_s);
 
     x = self.v(:,1); y = self.v(:,2); z = self.v(:,3);
@@ -6302,7 +5752,6 @@ function [trunk_template_v,trunk_template_f] = templateFitting_trunk(self)
     z_armpit = [self.r_armpit(3) self.l_armpit(3)];
     zStart = z_crotch;
     zEnd = min(z_armpit);
-    %n = (42*5)+1;
     n=(42/7)+1;
     zValue_vec = linspace(zStart,zEnd,n);
 
@@ -6310,37 +5759,19 @@ function [trunk_template_v,trunk_template_f] = templateFitting_trunk(self)
     keepIdx = keepIdx(~ismember(keepIdx,self.rArmIdx));
     keepIdx = keepIdx(~ismember(keepIdx,self.lArmIdx));
     [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, keepIdx);    
-    %start_vId = 5*(2*1*42)*l_circ_template_s;
     start_vId =(1/7)*(2*1*42)*l_circ_template_s;
-%             tic;
     [trunk_belowArmpit_template_v,trunk_belowArmpit_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);
-%             toc
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        %%%% may need to add the between armpits / see stitching code with Alex? 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
     circ_template = self.circ_template_xl;
     z_shoulder = [self.rShoulder(3) self.lShoulder(3)];
             zStart = max(z_armpit);
-   % zStart = min(z_armpit);
    
     zEnd = max(z_shoulder);
-    %n = (30*5)+1;
     n=(30/3)+1;
     zValue_vec = linspace(zStart,zEnd,n);            
     keepIdx = 1:length(self.v);
     [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, keepIdx);    
-%             start_vId = (40+40)/2*l_circ_template_s + 60/2*l_circ_template;
-    %start_vId = 5*(2*1*42+1*2*42)*l_circ_template_s;
     start_vId = (1/3)*(2*1*42+1*2*42)*l_circ_template_s;
-%             tic;
     [trunk_aboveArmpit_template_v,trunk_aboveArmpit_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);        
-%             toc    
-
     trunk_template_v = [trunk_belowArmpit_template_v;trunk_aboveArmpit_template_v];
     trunk_template_f = [trunk_belowArmpit_template_f;trunk_aboveArmpit_template_f];
 end
@@ -6392,7 +5823,6 @@ function [head_neck_template_v,head_neck_template_f, head_neck_bottomSliceReduct
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
 %%%%%%%%%%% using 2D CPD for fitting template to head %%%%%%%%%%%%%%%%%%%%%
-%             l_circ_template_l = length(self.circ_template_l);
             circ_template = self.circ_template_s;
             l_circ_template = length(circ_template);
             l_circ_template_s = l_circ_template;            
@@ -6400,17 +5830,13 @@ function [head_neck_template_v,head_neck_template_f, head_neck_bottomSliceReduct
             z_shoulder = [self.rShoulder(3) self.lShoulder(3)];
             zStart = max(z_shoulder);
             zEnd = max(z);
-            %n = (26*5)+1;
             n = (26*0.5)+1;
             zValue_vec = linspace(zStart,zEnd,n);
             
             keepIdx = 1:length(self.v);
             [~,vIdxOnLine] = getVOnLine(self, [x,y,z], zValue_vec, keepIdx);       
-%             start_vId = (40+40+20+20)/2*l_circ_template + (40+60)/2*l_circ_template_l;
             start_vId = 0.5*(2*1*42+1*2*42+1*4*30+2*1*30)*l_circ_template_s;
-%             tic;
             [head_neck_template_v,head_neck_template_f] = fitting_templateToBodyParts(circ_template,n,zValue_vec,vIdxOnLine,x,y,start_vId,self);        
-%             toc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end
@@ -6432,38 +5858,24 @@ function [circ_template_s,circ_template_l,circ_template_xl] = init_circ()
             x = linspace(-0.1,0.1,9);
             y_Sq=(0.1).^2-(x).^2;
             y = real([sqrt(y_Sq) -sqrt(y_Sq(end-1:-1:2))]);
-%             x = [x x(end-1:-1:2)];
-%             bin_x = linspace(-0.1,0.1,9);
-%             x = unique([linspace(bin_x(1),bin_x(2),5) linspace(bin_x(2),bin_x(8),9) linspace(bin_x(8),bin_x(9),5)]);
             x = [x x(end-1:-1:2)];
             circ_template_s = [x' y'];
-            
-            %x = linspace(-0.2,0.2,33);
             x = linspace(-0.2,0.2,17);
             y_Sq=(0.2).^2-(x).^2;
             y = real([sqrt(y_Sq) -sqrt(y_Sq(end-1:-1:2))]);
             x = [x x(end-1:-1:2)];
             circ_template_l = [x' y'];  
             
-%             x = linspace(-0.2,0.2,65);
-%             y_Sq=(0.2).^2-(x).^2;
-%             y = real([sqrt(y_Sq) -sqrt(y_Sq(end-1:-1:2))]);
-%             x = [x x(end-1:-1:2)];
-%             circ_template_xl = [x' y']; 
-            
-            %x_center = linspace(-0.1,0.1,34);
             x_center = linspace(-0.1,0.1,18);
             y_Sq=(0.1).^2-(x_center).^2;
             y_center = real([sqrt(y_Sq(2:end-1)) -sqrt(y_Sq(end-1:-1:2))]);
             x_center = [x_center(2:end-1) x_center(end-1:-1:2)];
 
-            %x_right = linspace(0.1,0.2,18);
             x_right = linspace(0.1,0.2,10);
             y_Sq=(0.05).^2-(x_right-0.15).^2;
             y_right = real([sqrt(y_Sq(3:end)) -sqrt(y_Sq(end-1:-1:2))]);     
             x_right = [x_right(3:end) x_right(end-1:-1:2)];
 
-            %x_left = linspace(-0.2,-0.1,18);
             x_left = linspace(-0.2,-0.1,10);
             y_Sq=(0.05).^2-(x_left+0.15).^2;
             y_left = real([sqrt(y_Sq(1:end-2)) -sqrt(y_Sq(end-1:-1:2))]); 
@@ -6473,17 +5885,11 @@ function [circ_template_s,circ_template_l,circ_template_xl] = init_circ()
             y = [y_left y_center y_right];
 
             circ_template_xl = [x' y'];
-            
-%             self.mnX_c_s = min(self.circ_template_s(:,1));
-%             self.mnY_c_s = min(self.circ_template_s(:,2));
-%             self.mxX_c_s = max(self.circ_template_s(:,1));
-%             self.mxY_c_s = max(self.circ_template_s(:,2));
+
 end
 function config = initialize_config_cpd
 config.ctrl_pts = [-0.147136620000000,0.251724140000000;0.123199920000000,0.251724140000000;0.393536470000000,0.251724140000000;0.663873020000000,0.251724140000000;0.934209570000000,0.251724140000000;-0.147136620000000,0.447701150000000;0.123199920000000,0.447701150000000;0.393536470000000,0.447701150000000;0.663873020000000,0.447701150000000;0.934209570000000,0.447701150000000;-0.147136620000000,0.643678160000000;0.123199920000000,0.643678160000000;0.393536470000000,0.643678160000000;0.663873020000000,0.643678160000000;0.934209570000000,0.643678160000000;-0.147136620000000,0.839655170000000;0.123199920000000,0.839655170000000;0.393536470000000,0.839655170000000;0.663873020000000,0.839655170000000;0.934209570000000,0.839655170000000;-0.147136620000000,1.03563220000000;0.123199920000000,1.03563220000000;0.393536470000000,1.03563220000000;0.663873020000000,1.03563220000000;0.934209570000000,1.03563220000000];
-%config.init_sigma = .5; config.outliers = 1; config.lambda = 1;
 config.init_sigma = .1; config.outliers = 1; config.lambda = 1;
-%config.beta = 1; config.anneal_rate = .97; config.tol = 1e-18;
 config.beta = 0.5; config.anneal_rate = .97; config.tol = 1e-18;
 config.emtol = 1e-15; config.max_iter = 100; config.max_em_iter = 10;
 config.motion = 'grbf';
@@ -6506,7 +5912,6 @@ if (d~=2)&&(d~=3)
     error('The current program only deals with 2D or 3D point sets.');
 end
 
-% tic
 model = config.model;
 scene = config.scene;
 ctrl_pts = config.ctrl_pts;
@@ -6551,7 +5956,6 @@ switch lower(config.motion)
         beta = config.beta;
         basis = cpd_G(model,ctrl_pts,beta);
         kernel = cpd_G(ctrl_pts,ctrl_pts,beta);
-        %A = inv(basis'*basis+lambda*sigma*sigma*kernel)*basis';
         A = basis'*basis+lambda*sigma*sigma*kernel;
     otherwise
         error('Unknown motion model');
@@ -6560,17 +5964,12 @@ end % end of switch
 param = config.init_param;  % it should always be of size n*d
 model = model + basis*param;
 
-%it_total = 1;
-%flag_stop = 0;
-
 iter=0; E=1; ntol=tol+10;
 
 while (iter < max_iter) && (ntol > tol)
     EMiter=0; EMtol=tol+10;  % repeat at each termperature.
     model_old = model;
     while (EMiter < max_em_iter) && (EMtol > tol)
-        %disp(sprintf('EMiter=%d',EMiter));
-        %disp(sprintf('E=%f',E));
         E_old = E;
         % E-step: Given model&scene, update posterior probability matrix P.
         [P,Eu] = cpd_P(model, scene, sigma, outliers);
@@ -6588,7 +5987,6 @@ while (iter < max_iter) && (ntol > tol)
                 param = [affine; tps];
             case 'grbf'
                 E = Eu + lambda/2*trace(param'*kernel*param); % CPD energy function.
-                %param = A\(basis'*motion);
                 dP=spdiags(sum(P,2),0,m,m); % precompute diag(P)
 
                 % with ctrl_pts
@@ -6606,7 +6004,7 @@ while (iter < max_iter) && (ntol > tol)
     iter = iter + 1;
     ntol = norm(model_old - model);
 end % end of annealing.
-% toc
+
 model = cpd_denormalize(model, centroid, scale);
 
 
@@ -6636,8 +6034,6 @@ end
 if nnz(s)==numel(s)
     E=-sum(log(s));  % log-likelihood
     P=P./repmat(s,n,1); % normalization such that each column sums to 1
-%    s=sum(P,2);
-%    P=P./repmat(s,1,m); % normalization such that each row sums to 1
 else
     P=[];E=[];
 end
@@ -6699,14 +6095,9 @@ function f = fixFaceOrientation_old(f,v)
     % get faces that may need to be changed
     E = [f(:,1) f(:,2); f(:,2) f(:,3); f(:,3) f(:,1)];
     badEdges = ~ismember([E(:,2) E(:,1)], E, 'rows');
-    
-    
-%     fixed = [newFixed;newFixed2];%!
-%     repeated = [];%!
 
     while(sum(badEdges))
         badFaces = find(sum(reshape(badEdges',length(f),3),2));
-%         newFixed = [];%!
         fprintf('Number of bad faces: %d\n',length(badFaces));%!
 
         % Get all unit normals of badFaces
@@ -6727,20 +6118,6 @@ function f = fixFaceOrientation_old(f,v)
         E2 = v(f(:,3),:) - v(f(:,1),:);
 
         for i = 1:length(normal)
-%             if mod(i,100) == 0%!
-%                 fprintf('Checking face: %d\n',i)%!
-%             end%!
-%             figure;
-%             s = 2;
-%             idx = v(:,1)<c(i,1)+s & v(:,1)>c(i,1)-s &...
-%                   v(:,2)<c(i,2)+s & v(:,2)>c(i,2)-s &...
-%                   v(:,3)<c(i,3)+s & v(:,3)>c(i,3)-s;
-%             idx = find(idx);
-%             closef = getFaces(f,idx);
-%             plotAva(closef,v,'y');
-%             hold on;
-%             plot3(c(i,1),c(i,2),c(i,3),'*r');
-%             quiver3(c(i,1),c(i,2),c(i,3),normal(i,1),normal(i,2),normal(i,3),'Color','r','AutoScaleFactor',10)
             
             % This follows the algorithm of Moeller and Trumbore
             D = normal(i,:);
@@ -6762,40 +6139,13 @@ function f = fixFaceOrientation_old(f,v)
             % change the orientation.
             if mod(length(intersections),2)
                 f(badFaces(i),:) = [f(badFaces(i),1) f(badFaces(i),3) f(badFaces(i),2)];
-%                 newFixed = [newFixed;badFaces(i)];
-
-%                 [~,idx] = ismember(badFaces(i),inv);
-%                 if idx == 0
-%                     stop = 1;
-%                 end
-%                 inv(idx) = [];
             end
         end
-        
-%         idx = ismember(newFixed,fixed);
-%         repeated = [repeated;newFixed(idx)];
-%         fprintf('Number of reapeated bad faces: %d\n',length(repeated))%!
-%         fixed = [fixed;newFixed];
-%         fprintf('Total number of fixed: %d. Of that new %d\n',length(fixed),length(newFixed))
-%         fixed = unique(fixed);
-%         figure();%!
-%         fminusbad = f;%!
-%         [~,idx] = ismember(sort(f(badFaces,:),2),sort(f,2),'rows');%!
-%         fminusbad(idx,:) = [];%!
-%         plotAva(fminusbad,v,'y');%!
-%         plotAva(f(badFaces,:),v,'m')%!
-%         plotAva(f(repeated,:),v,'g')%!
-%         drawnow%!
         
         E = [f(:,1) f(:,2); f(:,2) f(:,3); f(:,3) f(:,1)];
         badEdges = ~ismember([E(:,2) E(:,1)], E, 'rows');
     end
     
-%     if ~isempty(inv)
-%         fprintf('%d faces were not detected.',length(inv));
-%         stop = 1;
-%     end
-%     fprintf('All inverted faces were fixed.');
 end
 function f = fixFaceOrientation(f,v)
 % Fixes the orientation of all faces so that the vertices are in
