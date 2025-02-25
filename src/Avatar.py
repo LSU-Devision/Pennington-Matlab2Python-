@@ -35,4 +35,4 @@ class Avatar:
 if __name__ == "__main__":
     obj = Avatar("test/mesh/cow.ply")
     obj.render()
-        
+    
