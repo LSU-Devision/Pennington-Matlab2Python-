@@ -33,6 +33,6 @@ class Avatar:
         open3d.visualization.draw_geometries([self.mesh])
 
 if __name__ == "__main__":
-    obj = Avatar("test/mesh/cow.ply")
+    obj = Avatar("test/mesh/troll.ply")
     obj.render()
     
