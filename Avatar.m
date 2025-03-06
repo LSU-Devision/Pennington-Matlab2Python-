@@ -1,6 +1,6 @@
 classdef Avatar
-    
-    %% This avatar includes the legs division for the volume calculation
+ 
+ %% This avatar includes the legs division for the volume calculation
     
     
  % General description: Avatar finds landmarks and computes lengths, circumferences, volumes, SA of an avatar
@@ -156,7 +156,6 @@ classdef Avatar
         l_bicepgirth
         r_ankle_girth
         l_ankle_girth
-        
         
         volume
         surfaceArea
