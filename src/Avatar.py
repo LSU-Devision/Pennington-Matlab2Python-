@@ -1,10 +1,38 @@
 import open3d
 import open3d.visualization
+import os
+from pathlib import Path
 
-#
-mesh = open3d.io.read_triangle_mesh("test/mesh/cow.ply")
+class Settings:
+    pass
 
-# Draws mesh to screen
-open3d.visualization.draw_geometries([mesh])
+class Measurement:
+    pass
+    
+class Head(Measurement):
+    pass
+    
+class Torso(Measurement):
+    pass 
 
-print(mesh)
+class Leg(Measurement):
+    pass
+
+class Arm(Measurement):
+    pass
+
+class Avatar:    
+    def __init__(self, fp: os.PathLike):
+        self.path = Path(fp)
+        self.mesh = None
+        
+        if self.path.suffix in ('.ply', '.obj'):
+            self.mesh = open3d.io.read_triangle_mesh(self.path)
+    
+    def render(self):
+        open3d.visualization.draw_geometries([self.mesh])
+
+if __name__ == "__main__":
+    obj = Avatar("test/mesh/cow.ply")
+    obj.render()
+    
