@@ -1,48 +1,4 @@
 classdef Avatar
- 
- %% This avatar includes the legs division for the volume calculation
-    
-    
- % General description: Avatar finds landmarks and computes lengths, circumferences, volumes, SA of an avatar
-    
- % How to use the code:
-    % call Avatar(my_example)
-     
-    %  my_example can be a string either  'my_example.obj' or 'my_example.ply' or a struct with my_example.f being the
-    %  list of faces and my_example.v being the list of vertices.
-    %  my_example.v has 3 columns containing (x,y,z) coordinates of the
-    %  point cloud and the my_example.f has 3 columns containing vertex indices, i.e., row numbers of my_example.v
-     
-     % Additional inputs include 'steps','circumference','Vol_SA', 'template_only'
-     
-        % Values for 'steps' can be:
-            % 1 for Cleaning mesh; 
-            % 2 for Mesh repair;
-            % 3 for Landmark detection and lengths and circumferences.
-            % default is [1,2,3]
-            % example : Avatar(my_example,'steps',[2,3])
-        % Values for 'circumference' can be:
-            % 'CPD' calculates circumferences after fitting a circle template using CPD
-            % 'ellipse' calculates circumferences after fitting an ellipse 
-            % 'all' does both
-            % default does not do any of them
-            % example : Avatar(my_example,'circumference','ellipse')            
-        % Use 'Vol_SA' > 'on' to calculate volumes and surface areas, default is 'off'
-        % Use 'SA' > 'on' to calculate SA only.
-        % Use 'WB_SA_only' > 'on' to calculate only the total body SA.
-        % Use 'template_only' > 'on' to just do the template fitting, default is 'off'
-            % example : Avatar(my_example,'template_only','on') 
-        % Use 'markers' > 'on' to save the txt file and the 2D figure from
-        % Use 'markers_template' > 'on' to save the txt file and the 2D figure from
-        % the front and the back of the Avatar with the 30 markers
-        % Use 'armpits_alt' > 'on' to use alternative armpit method, default is 'off'
-        % 'arpits_old'
-        
-        
-        % Note: 
-            % More than one property can be set at the same time
-            % Ordering which properties are mentionned does not matter
-            % example: Avatar(my_example,'Vol_SA','on','circumference','ellipse','steps',[2,3])   
     
     properties
         v % Vertices
@@ -156,6 +112,7 @@ classdef Avatar
         l_bicepgirth
         r_ankle_girth
         l_ankle_girth
+        
         
         volume
         surfaceArea
@@ -807,10 +764,9 @@ classdef Avatar
             alphas = [pi/8, pi/12, pi/24];
             for i = 1:3
                 alpha = alphas(i);
-                [new_rs_v1, new_rs_v3] = rotate_person(r_side(:,1), r_side(:,2), alpha); %rotates right side to apply find_minmax function 
+                [new_rs_v1, new_rs_v3] = rotate_person(r_side(:,1), r_side(:,2), alpha); 
 
-                [new_ls_v1, new_ls_v3] = rotate_person(l_side(:,1), l_side(:,2), -alpha); %rotates left side to apply find_minmax function
-
+                [new_ls_v1, new_ls_v3] = rotate_person(l_side(:,1), l_side(:,2), -alpha);
                 [m_V_Right, m_I_Right] = min(new_rs_v1);
                 rh = [m_V_Right, new_rs_v3(m_I_Right)];  %gives rotated right hand
 
@@ -872,14 +828,7 @@ classdef Avatar
         end
         
         function [rightArmpit, leftArmpit] = getArmpitsAlt(self)
-        % [rightArmpit, leftArmpit] = getArmpitsAlt(self) returns the highest
-        % point of the arch under the arms. Note that if the arms are
-        % connected to the body, the points may need to be adjusted.
-        %
-        % Output:
-        %   rightArmpit - [x,y,z], right armpit
-        %   leftArmpit  - [x,y,z], left armpit
-        
+
             maxv1 = max(self.v(:,1));
             minv1 = min(self.v(:,1));
             maxv3 = max(self.v(:,3));
@@ -2466,7 +2415,6 @@ classdef Avatar
         
         function [p1,p3] = findMaxMin(self,left,right,num)
         % Finds the maximum of the mins
-        % This function is similar to find_minmax but uses vOnLine
             [v1,v3] = rotate_person(self.v(:,1),self.v(:,3),pi/2);
             [right(1),right(3)] = rotate_person(right(1),right(3),pi/2);
             [left(1),left(3)] = rotate_person(left(1),left(3),pi/2);
@@ -3044,11 +2992,11 @@ end
 
 
 
-%%START OF LIB FUNCTIONS
+%%START OF LIB 
 
 
 
-%% other functions
+%% other 
 function [newV,newF] = meshPoly(v,e)
 % [newV,newF] = meshPoly(v,e) creates a mesh for a given polynomial. It
 % uses the centroid of all edges to create a new face. newV will be the
@@ -3241,7 +3189,7 @@ end
 function obj = readObj(fname)
     %
     % obj = readObj(fname)
-    % This function can read styku or fit3d_proscanner file
+    % This can read styku or fit3d_proscanner file
     %
     % INPUT: fname - wavefront object file full path
     %
@@ -3353,7 +3301,7 @@ function [Elements,varargout] = plyread(Path,Str)
         %   and face data into triangular connectivity and vertex arrays.  The
         %   mesh can then be displayed using the TRISURF command.
         %
-        %   Note: This function is slow for large mesh files (+50K faces),
+        %   Note: This is slow for large mesh files (+50K faces),
         %   especially when reading data with list type properties.
         %
         %   Example:
@@ -4167,7 +4115,7 @@ end
 end
 function [list,bdyEdges,f,v] = getListOfHoles(f,v)
 % [list,bdyEdges,f,v] = getListOfHoles(f,v) groups the boundary edges into
-% a list. Note that some vertices and faces are removed in this function.
+% a list. Note that some vertices and faces are removed in this 
 % So f and v need to be updated.
 %
 % Example:
@@ -4560,7 +4508,7 @@ function point = projPointOnPlane(point, plane)
 %   given as [X0 Y0 Z0  VX1 VY1 VZ1  VX2 VY2 VZ2] (origin point, first
 %   direction vector, second directionvector).
 %   
-%   The function is fully vectorized, in that multiple points may be
+%   The  is fully vectorized, in that multiple points may be
 %   projected onto multiple planes in a single call, returning multiple
 %   points. With the exception of the second dimension (where
 %   SIZE(PT1,2)==3, and SIZE(PLANE,2)==9), each dimension of PT1 and PLANE
@@ -4917,9 +4865,9 @@ function D = gradOfDistanceOfPointToPoly(fitPoly,p,x)
 % Gives the gradient of the distance funtion of a point to a polynomial.
 %
 % Input:
-%   fitPoly     - polynomial from the function fitPolyToHole
+%   fitPoly     - polynomial from the  fitPolyToHole
 %   p           - the point
-%   x=(x_1,x_2) - variable of distance function
+%   x=(x_1,x_2) - variable of distance 
 
     % Normalize data
     x(1) = (x(1)-fitPoly.normalizeData(1))./fitPoly.normalizeData(3);
@@ -4961,7 +4909,7 @@ function D = gradOfDistanceOfPointToPoly(fitPoly,p,x)
         end
     end
     
-    % Gradient of distance function
+    % Gradient of distance 
     D = zeros(1,2);
     D(1) = 2*(x(1)-p(1))*fitPoly.normalizeData(3)^2 + 2*(P-p(3))*Px;
     D(2) = 2*(x(2)-p(2))*fitPoly.normalizeData(4)^2 + 2*(P-p(3))*Py;
@@ -5876,7 +5824,7 @@ function [new_v1, new_v3] = rotate_person(v1, v3, alpha)
     new_v1 = person_rotated(:,1);
     new_v3 = person_rotated(:,2);
 end
-%%% CPD-related functions:
+%%% CPD-related :
 function [circ_template_s,circ_template_l,circ_template_xl] = init_circ()
 
             %x = linspace(-0.1,0.1,17);
@@ -6003,7 +5951,7 @@ while (iter < max_iter) && (ntol > tol)
         switch lower(config.motion)
             case 'tps'
                 tps = param(d+2:end,:);
-                E = Eu + lambda/2*trace(tps'*kernel*tps); % CPD energy function.
+                E = Eu + lambda/2*trace(tps'*kernel*tps); % CPD energy .
                 s=sum(P,2);
                 P=P./repmat(s,1,m); % normalization such that each row sums to 1
                 motion = P * scene - model0;
@@ -6011,7 +5959,7 @@ while (iter < max_iter) && (ntol > tol)
                 affine = inv(R)*Q1'*(motion-TB*tps);
                 param = [affine; tps];
             case 'grbf'
-                E = Eu + lambda/2*trace(param'*kernel*param); % CPD energy function.
+                E = Eu + lambda/2*trace(param'*kernel*param); % CPD energy .
                 dP=spdiags(sum(P,2),0,m,m); % precompute diag(P)
 
                 % with ctrl_pts
@@ -6033,7 +5981,7 @@ end % end of annealing.
 model = cpd_denormalize(model, centroid, scale);
 
 
-end % end of function
+end % end of 
 function [P, E] = cpd_P(x, y, sigma, outliers)
 
 if nargin<3, error('cpd_P.m error! Not enough input parameters.'); end;
@@ -6451,7 +6399,7 @@ function [h, ext] = labelpoints (xpos, ypos, labels, varargin)
 %  [h, ext] = labelpoints (xpos, ypos, labels, position, buffer, adjust_axes, varargin)
 %
 %   Given x and y coordinate vectors (xpos, ypos) and given
-%     a vector of labels this function will label all data points
+%     a vector of labels this  will label all data points
 %     and output the label handles in vector, h and the label extents in ext.
 %
 % ***REQUIRED INPUTS (the basics)***************
@@ -6547,7 +6495,7 @@ function [h, ext] = labelpoints (xpos, ypos, labels, varargin)
 %         labelpoints(max(xlim), min(ylim), {'A','B','C','D','E','F','G'}, 'stacked', 'up')
 %
 %   'outliers...'
-%       This function includes optional parameters to identify and label only the outliers.
+%       This  includes optional parameters to identify and label only the outliers.
 %       This can come in handy when you want to avoid cluttered labels or only want to see outlier labels.  
 %       NaNs values will be ignored. There are several ways to identify outliers: (may require stats toolbox)
 %       'outliers_SD', N   -  will only label points that are greater than N standard deviations from
@@ -6720,7 +6668,7 @@ function [h, ext] = labelpoints (xpos, ypos, labels, varargin)
 %               only considers xpos ypos pairs that do not have NaN. See pairIDX.
 %               changed text rotation to always center and added 'factor' section.
 %   10/28/15    Changed outlier section from if/then to switch case. Added outlier_lin section!
-%   12/21/15    Added 'stacked' input option - major addition, no change to previous functionality.
+%   12/21/15    Added 'stacked' input option - major addition, no change to previous .
 %   12/30/15    adjustments to help section; combined 2 sections at beginning that deal with text rotation.
 %               *Changed medians to means in outlier section.
 %               *Added more flexibility to some outlier inputs so user can identify their own center.
@@ -6801,7 +6749,8 @@ validPositions = {'N' 'NE' 'E' 'SE' 'S' 'SW' 'W' 'NW' 'center' 'C'};
 checkPosition = @(x) any(validatestring(x, validPositions));
 checkCoordinate = @(x) (isnumeric(x) | isa(x, 'datetime'));
 p = inputParser;
-p.FunctionName = mfilename;
+% I CHANGED THIS TO NOT SHOW UP FOR FNCTIONS
+p.FunctlonName = mfilename;
 addRequired(p, 'xpos', checkCoordinate);
 addRequired(p, 'ypos', checkCoordinate);
 addRequired(p, 'labels');
@@ -7130,7 +7079,7 @@ if outlier_flag
     % end
 end %outlier_flag
 %% WRITE TEXT
-%If there is more than 1 color element we'll need to loop through each label since matlab's text() function only allows for 1 color.
+%If there is more than 1 color element we'll need to loop through each label since matlab's text()  only allows for 1 color.
 if multiColor
     hand = zeros(size(labels));
     for k = 1:length(labels)
