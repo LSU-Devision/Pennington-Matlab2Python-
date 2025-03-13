@@ -2,6 +2,7 @@ import open3d
 import open3d.visualization
 import os
 from pathlib import Path
+import pymeshlab
 
 class Settings:
     pass
@@ -26,13 +27,21 @@ class Avatar:
         self.path = Path(fp)
         self.mesh = None
         
-        if self.path.suffix in ('.ply', '.obj'):
-            self.mesh = open3d.io.read_triangle_mesh(self.path)
-    
+        if self.path.suffix == '.obj':
+            obj = pymeshlab.MeshSet()
+            obj.load_new_mesh(str(self.path))
+            self.path = self.path.parent / Path(str(self.path.stem) + '.ply')
+            obj.save_current_mesh(str(self.path))
+            
+        if self.path.suffix == '.ply':
+            self.mesh = open3d.io.read_triangle_mesh(str(self.path))
+
+        
+        
     def render(self):
         open3d.visualization.draw_geometries([self.mesh])
 
 if __name__ == "__main__":
-    obj = Avatar("test/mesh/troll.ply")
+    obj = Avatar("test/mesh/man.obj")
     obj.render()
     
