@@ -1,4 +1,4 @@
-[Paper 1](https://onlinelibrary.wiley.com/doi/epdf/10.1002/oby.2325)
+[Paper 1](https://pmc.ncbi.nlm.nih.gov/articles/PMC7187953/)
 Somewhat helpful
 
 [Paper 2](https://onlinelibrary.wiley.com/doi/epdf/10.1002/osp4.467)
