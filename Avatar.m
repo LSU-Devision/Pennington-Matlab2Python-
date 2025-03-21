@@ -208,7 +208,7 @@ classdef Avatar
                     self.v = myObj.v;
                     self.f = uint32(myObj.f);
                 elseif strcmp(input(end-2:end),'ply')
-                    [v,f] = read_ply(input);
+                    [v,f] = f(input);
                     self.v = v;
                     self.f = uint32(f);
                 end

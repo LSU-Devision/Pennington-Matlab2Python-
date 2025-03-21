@@ -22,7 +22,7 @@ class Leg(Measurement):
 class Arm(Measurement):
     pass
 
-class Avatar:    
+class Render:    
     def __init__(self, fp: os.PathLike):
         self.path = Path(fp)
         self.mesh = None
@@ -42,6 +42,6 @@ class Avatar:
         open3d.visualization.draw_geometries([self.mesh])
 
 if __name__ == "__main__":
-    obj = Avatar("test/mesh/man.obj")
+    obj = Render("test/mesh/cow.ply")
     obj.render()
     
