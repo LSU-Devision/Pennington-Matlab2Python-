@@ -110,50 +110,52 @@ class Avatar:
 
     def mark_crotch(self):
         verts = self.mesh.vertices
-        x_values = verts[:, 0]
-        z_values = verts[:, 2]
+        xs = verts[:, 0]
+        zs = verts[:, 2]
 
-        min_x, max_x = np.percentile(x_values, 10), np.percentile(x_values, 90)
-        print(f"Min X (25th percentile): {min_x}")
-        print(f"Max X (75th percentile): {max_x}")
+        # Get overall mesh height (Z range)
+        mesh_height = zs.max() - zs.min()
+        threshold = mesh_height * 0.25
 
-        # Visualize 25th and 75th percentile x values as vertical lines
-        for x_val, color in zip([min_x, max_x], [[255, 0, 0, 255], [0, 0, 255, 255]]):
-            line = trimesh.load_path(np.array([
-                [[x_val, 0, z_values.min()], [x_val, 0, z_values.max()]]
-            ]))
-            line.colors = np.tile(color, (len(line.entities), 1))
-            self.scene.add_geometry(line)
+        x_steps = np.linspace(xs.min(), xs.max(), 200)
+        min_zs = []
 
-        # Now try to find the crotch by sweeping through z slices and keeping only middle 50% in X
-        z_range = np.linspace(z_values.min(), z_values.max(), 60)
-        prev_n_clusters = None
+        for x in x_steps:
+            mask = np.abs(xs - x) < 0.005
+            slice_verts = verts[mask]
 
-        for z in z_range:
-            slice_mask = (
-                (np.abs(verts[:, 2] - z) < 0.05) &  # Thickness of the slice
-                (verts[:, 0] >= min_x) &
-                (verts[:, 0] <= max_x)
-            )
-            slice_verts = verts[slice_mask]
-            if len(slice_verts) < 10:
+            if len(slice_verts) == 0:
                 continue
 
-            coords_2d = slice_verts[:, :2]
-            clustering = DBSCAN(eps=0.03, min_samples=5).fit(coords_2d)
-            labels = clustering.labels_
-            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+            slice_zs = slice_verts[:, 2]
+            z_span = slice_zs.max() - slice_zs.min()
 
-            if prev_n_clusters == 2 and n_clusters == 1:
-                crotch_point = np.mean(slice_verts, axis=0)
-                print(f"Crotch found at: {crotch_point}")
-                marker = trimesh.creation.icosphere(radius=0.02)
-                marker.apply_translation(crotch_point)
-                marker.visual.face_colors = [255, 165, 0, 255]
-                self.scene.add_geometry(marker)
-                break
+            # Skip slices where vertical range is too small
+            if z_span < threshold:
+                continue
 
-            prev_n_clusters = n_clusters
+            min_z = slice_zs.min()
+            min_zs.append((x, min_z))
+
+        if not min_zs:
+            print("No valid X-slices with sufficient vertical range.")
+            return
+
+        crotch_x, crotch_z = max(min_zs, key=lambda item: item[1])
+
+        # Estimate Y for display
+        candidate_verts = verts[np.abs(xs - crotch_x) < 0.01]
+        candidate_verts = candidate_verts[np.abs(candidate_verts[:, 2] - crotch_z) < 0.01]
+        crotch_y = candidate_verts[:, 1].mean() if len(candidate_verts) > 0 else 0.0
+
+        crotch_point = np.array([crotch_x, crotch_y, crotch_z])
+        print(f"Crotch found at: {crotch_point}")
+
+        marker = trimesh.creation.icosphere(radius=0.2)
+        marker.apply_translation(crotch_point)
+        marker.visual.face_colors = [255, 165, 0, 255]
+        self.scene.add_geometry(marker)
+
 
     def draw_bounding_box(self):
         corners = self.mesh.bounding_box_oriented.vertices
