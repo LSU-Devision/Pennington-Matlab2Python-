@@ -2,6 +2,43 @@ import trimesh
 import numpy as np
 from sklearn.cluster import DBSCAN
 
+
+
+def get_significant_min_values_along_axis(
+        vertices, 
+        scan_axis=0,        # 0 for x, 1 for y, 2 for z
+        height_axis=2,      # 2 for z, etc.
+        resolution=200, 
+        threshold_ratio=0.25, 
+        slice_width=0.005
+    ):
+        scan_coords = vertices[:, scan_axis]
+        height_coords = vertices[:, height_axis]
+
+        height_range = height_coords.max() - height_coords.min()
+        threshold = height_range * threshold_ratio
+
+        steps = np.linspace(scan_coords.min(), scan_coords.max(), resolution)
+        min_values = []
+
+        for val in steps:
+            mask = np.abs(scan_coords - val) < slice_width
+            slice_verts = vertices[mask]
+
+            if len(slice_verts) == 0:
+                continue
+
+            slice_heights = slice_verts[:, height_axis]
+            height_span = slice_heights.max() - slice_heights.min()
+
+            if height_span < threshold:
+                continue
+
+            min_val = slice_heights.min()
+            min_values.append((val, min_val))
+
+        return min_values
+
 class Avatar:
     def __init__(self, mesh_path):
         self.mesh = trimesh.load(mesh_path)
@@ -12,6 +49,7 @@ class Avatar:
         self.mark_extrema()
         self.mark_feet()
         self.mark_crotch()
+        self.mark_armpits()
         #self.draw_bounding_box()
         #self.draw_axes()
         self.scene.show()
@@ -108,62 +146,75 @@ class Avatar:
                 marker.visual.face_colors = [128, 0, 128, 255]
                 self.scene.add_geometry(marker)
 
-    def mark_crotch(self):
+    def get_crotch(self):
         verts = self.mesh.vertices
-        xs = verts[:, 0]
-        zs = verts[:, 2]
-
-        # Get overall mesh height (Z range)
-        mesh_height = zs.max() - zs.min()
-        threshold = mesh_height * 0.25
-
-        x_steps = np.linspace(xs.min(), xs.max(), 200)
-        min_zs = []
-
-        for x in x_steps:
-            mask = np.abs(xs - x) < 0.005
-            slice_verts = verts[mask]
-
-            if len(slice_verts) == 0:
-                continue
-
-            slice_zs = slice_verts[:, 2]
-            z_span = slice_zs.max() - slice_zs.min()
-
-            # Skip slices where vertical range is too small
-            if z_span < threshold:
-                continue
-
-            min_z = slice_zs.min()
-            min_zs.append((x, min_z))
+        min_zs = get_significant_min_values_along_axis(verts, 0, 2)
 
         if not min_zs:
-            print("No valid X-slices with sufficient vertical range.")
-            return
+            print("No valid slices with sufficient height spread.")
+            return None
 
         crotch_x, crotch_z = max(min_zs, key=lambda item: item[1])
 
-        # Estimate Y for display
-        candidate_verts = verts[np.abs(xs - crotch_x) < 0.01]
+        candidate_verts = verts[np.abs(verts[:, 0] - crotch_x) < 0.01]
         candidate_verts = candidate_verts[np.abs(candidate_verts[:, 2] - crotch_z) < 0.01]
         crotch_y = candidate_verts[:, 1].mean() if len(candidate_verts) > 0 else 0.0
 
-        crotch_point = np.array([crotch_x, crotch_y, crotch_z])
+        return np.array([crotch_x, crotch_y, crotch_z])
+    
+    def mark_crotch(self):
+        crotch_point = self.get_crotch()
+        if crotch_point is None:
+            return
+
         print(f"Crotch found at: {crotch_point}")
 
         marker = trimesh.creation.icosphere(radius=0.2)
         marker.apply_translation(crotch_point)
         marker.visual.face_colors = [255, 165, 0, 255]
         self.scene.add_geometry(marker)
+    
+    def get_armpits(self):
+        verts = self.mesh.vertices
+        crotch = self.get_crotch()
+        if crotch is None:
+            return None, None
 
+        crotch_x = crotch[0]
+        left_verts = verts[verts[:, 0] < crotch_x]
+        right_verts = verts[verts[:, 0] > crotch_x]
 
-    def draw_bounding_box(self):
-        corners = self.mesh.bounding_box_oriented.vertices
-        for v in corners:
+        def find_armpit(region_verts):
+            min_zs = get_significant_min_values_along_axis(region_verts, 0, 2,200,.01)
+            if not min_zs:
+                return None
+            armpit_x, armpit_z = max(min_zs, key=lambda item: item[1])
+            candidate_verts = region_verts[np.abs(region_verts[:, 0] - armpit_x) < 0.01]
+            candidate_verts = candidate_verts[np.abs(candidate_verts[:, 2] - armpit_z) < 0.01]
+            armpit_y = candidate_verts[:, 1].mean() if len(candidate_verts) > 0 else 0.0
+            return np.array([armpit_x, armpit_y, armpit_z])
+
+        return find_armpit(left_verts), find_armpit(right_verts)
+
+    def mark_armpits(self):
+        left, right = self.get_armpits()
+
+        if left is not None:
+            print(f"Left armpit: {left}")
             marker = trimesh.creation.icosphere(radius=0.2)
-            marker.apply_translation(v)
-            marker.visual.face_colors = [255, 255, 0, 255]
+            marker.apply_translation(left)
+            marker.visual.face_colors = [0, 255, 255, 255]  # cyan
             self.scene.add_geometry(marker)
+
+        if right is not None:
+            print(f"Right armpit: {right}")
+            marker = trimesh.creation.icosphere(radius=0.2)
+            marker.apply_translation(right)
+            marker.visual.face_colors = [255, 0, 255, 255]  # magenta
+            self.scene.add_geometry(marker)
+
+
+
 
     def draw_axes(self):
         origin = np.array([0.0, 0.0, 0.0])
@@ -177,6 +228,7 @@ class Avatar:
             line = trimesh.load_path(np.array([[origin, origin + vec]]))
             line.colors = np.tile(color, (len(line.entities), 1))
             self.scene.add_geometry(line)
+    
 
 mesh_path = "man.obj"
 avatar = Avatar(mesh_path)
