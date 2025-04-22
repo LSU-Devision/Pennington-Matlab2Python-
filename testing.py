@@ -156,7 +156,12 @@ class Avatar:
         marker.visual.face_colors = [255, 165, 0, 255]
         self.scene.add_geometry(marker)
 
-
+    def draw_plane(self, center, normal):
+        extent = [10, 10, .01]
+        transform = trimesh.transformations
+        plane = trimesh.creation.box(extent, transform)
+    
+    
     def draw_bounding_box(self):
         corners = self.mesh.bounding_box_oriented.vertices
         for v in corners:
