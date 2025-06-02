@@ -5,39 +5,51 @@ from sklearn.cluster import DBSCAN
 
 
 def get_significant_min_values_along_axis(
-        vertices, 
-        scan_axis=0,        # 0 for x, 1 for y, 2 for z
-        height_axis=2,      # 2 for z, etc.
-        resolution=200, 
-        threshold_ratio=0.25, 
-        slice_width=0.005
+        vertices:np.typing.ArrayLike, 
+        scan_axis:int=0,        # 0 for x, 1 for y, 2 for z
+        height_axis:int=2,      # 2 for z, etc.
+        resolution:int=200, 
+        threshold_ratio:float=0.25, 
+        slice_width:float=0.005
     ):
-        scan_coords = vertices[:, scan_axis]
-        height_coords = vertices[:, height_axis]
+    """
 
-        height_range = height_coords.max() - height_coords.min()
-        threshold = height_range * threshold_ratio
+    Args:
+        vertices (ArrayLike): _description_
+        scan_axis (int, optional): _description_. Defaults to 0.
+        height_axis (int, optional): _description_. Defaults to 2.
+        threshold_ratio (float, optional): _description_. Defaults to 0.25.
+        slice_width (float, optional): _description_. Defaults to 0.005.
 
-        steps = np.linspace(scan_coords.min(), scan_coords.max(), resolution)
-        min_values = []
+    Returns:
+        _type_: _description_
+    """
+    scan_coords = vertices[:, scan_axis]
+    height_coords = vertices[:, height_axis]
 
-        for val in steps:
-            mask = np.abs(scan_coords - val) < slice_width
-            slice_verts = vertices[mask]
+    height_range = height_coords.max() - height_coords.min()
+    threshold = height_range * threshold_ratio
 
-            if len(slice_verts) == 0:
-                continue
+    steps = np.linspace(scan_coords.min(), scan_coords.max(), resolution)
+    min_values = []
 
-            slice_heights = slice_verts[:, height_axis]
-            height_span = slice_heights.max() - slice_heights.min()
+    for val in steps:
+        mask = np.abs(scan_coords - val) < slice_width
+        slice_verts = vertices[mask]  
 
-            if height_span < threshold:
-                continue
+        if len(slice_verts) == 0:
+            continue
 
-            min_val = slice_heights.min()
-            min_values.append((val, min_val))
+        slice_heights = slice_verts[:, height_axis]
+        height_span = slice_heights.max() - slice_heights.min()
 
-        return min_values
+        if height_span < threshold:
+            continue
+
+        min_val = slice_heights.min()
+        min_values.append((val, min_val))
+
+    return min_values
 
 class Avatar:
     def __init__(self, mesh_path):
