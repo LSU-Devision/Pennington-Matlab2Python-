@@ -1,6 +1,8 @@
 import trimesh
 import numpy as np
 from scipy.spatial import cKDTree
+from typing import Tuple
+from shapes import convexity_search
 # Conventions from negative to positive
 # x is left-right
 # y is back-front
@@ -42,6 +44,7 @@ class Body(Volume):
     def __init__(self, mesh: trimesh.Trimesh):
         super().__init__(mesh)
         self.mesh = self.orient(self.mesh)
+        
         
     def orient(self, mesh: trimesh.Trimesh) -> trimesh.Trimesh:
         new_mesh = mesh.copy()
@@ -99,6 +102,52 @@ class Body(Volume):
         maxs = np.max(mesh.vertices, axis=0)
         major_axis = np.argmax(maxs - mins)
         return major_axis
+    
+    def _identify_feet(self, mesh: trimesh.Trimesh) -> Tuple[np.ndarray, np.ndarray]:
+        # This method assumes the mesh is oriented
+        new_mesh = mesh.copy()
+        
+        kdtree = cKDTree(new_mesh.vertices)
+        
+        lower_half_vertices = new_mesh.vertices[new_mesh.vertices[:, 2] < 0, :]
+        left_side = lower_half_vertices[lower_half_vertices[:, 0] < 0, :]
+        left_foot = left_side[np.argmin(left_side, axis=0)[2], :]
+        
+        right_foot_estimate = left_foot.copy()
+        right_foot_estimate[0] *= -1
+        
+        right_foot = new_mesh.vertices[kdtree.query(right_foot_estimate)[1], :]
+        
+        return left_foot, right_foot
+        
+    def _identify_crotch(self, 
+                         mesh: trimesh.Trimesh) -> np.ndarray:
+        new_mesh = mesh.copy()
+        
+        kdtree = cKDTree(new_mesh.vertices)
+        
+        minimum_z = new_mesh.vertices[np.argmin(new_mesh.vertices, axis=0)[2], 2]
+        
+        ray_origin = np.array([0, 0, minimum_z])
+        ray_direction = np.array([0, 0, 1])
+        
+        intersects = new_mesh.ray.intersects_location(
+            ray_origins=[ray_origin],
+            ray_directions=[ray_direction]
+        )[0]
+        
+        min_viable_point = intersects[np.argmin(intersects, axis=0)[2], :]
+        viable_point_idx =  kdtree.query(min_viable_point)[1]
+        viable_point = new_mesh.vertices[viable_point_idx]
+        
+        crotch_point_nearest = convexity_search(new_mesh, 
+                                        rays=32,
+                                        origin=viable_point)
+        
+        crotch_point_idx = kdtree.query(crotch_point_nearest)[1]
+        crotch_point = new_mesh.vertices[crotch_point_idx]
+        
+        return crotch_point
         
 if __name__ == '__main__':
     mesh_file_path = 'test/mesh/penn-mesh-2.obj' 
